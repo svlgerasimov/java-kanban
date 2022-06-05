@@ -1,5 +1,3 @@
-import java.util.Objects;
-
 public class Task {
     public static final int STATUS_NEW = 1;
     public static final int STATUS_IN_PROGRESS = 2;
@@ -29,22 +27,12 @@ public class Task {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getStatus() {
         return status;
-    }
-
-    //При замене на обновленный экземпляр задачи она ищется по id, поэтому сравнение только по этому полю
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Task task = (Task) o;
-        return id == task.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 
     @Override
@@ -63,7 +51,7 @@ public class Task {
             case STATUS_NEW:
                 result = "NEW";
                 break;
-            case  STATUS_IN_PROGRESS:
+            case STATUS_IN_PROGRESS:
                 result = "IN_PROGRESS";
                 break;
             case STATUS_DONE:

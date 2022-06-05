@@ -15,16 +15,12 @@ public class TaskManager {
         nextId = 0;
     }
 
-    public int generateNextId() {
+    private int generateNextId() {
         return nextId++;
     }
 
     public ArrayList<Task> getTasks() {
-        ArrayList<Task> result = new ArrayList<>();
-        for(Task task : tasks.values()) {
-            result.add(task);
-        }
-        return result;
+        return new ArrayList<>(tasks.values());
     }
 
     public void clearTasks() {
@@ -36,17 +32,22 @@ public class TaskManager {
         return tasks.get(id);
     }
 
-    //добавляет задачу, если такой ещё нет
-    public void addTask(Task task) {
-        if(task == null) {
-            return;
+    //добавляет задачу, назначая ей id
+    public Task addTask(Task task) {
+        if (task == null) {
+            return null;
         }
-        int id = task.getId();
-        tasks.putIfAbsent(id, task);
+        int id = generateNextId();
+        task.setId(id);
+        tasks.put(id, task);
+        return task;
     }
 
-    //обновляет задачу, если такая есть
+    //обновляет задачу, если задача с таким id есть
     public void updateTask(Task task) {
+        if (task == null) {
+            return;
+        }
         int id = task.getId();
         tasks.replace(id, task);
     }
@@ -56,135 +57,142 @@ public class TaskManager {
     }
 
     public ArrayList<Subtask> getSubtasks() {
-        ArrayList<Subtask> result = new ArrayList<>();
-        for(Subtask subtask : subtasks.values()) {
-            result.add(subtask);
-        }
-        return result;
+        return new ArrayList<>(subtasks.values());
     }
 
     public void clearSubtasks() {
-        for (Subtask subtask : subtasks.values()) {
-            Epic epic = subtask.getEpic();
-            if(epic != null) {
-                epic.removeSubtask(subtask);
-            }
+        for (Epic epic : epics.values()) {
+            epic.clearSubtasks();
+            updateEpicStatus(epic);
         }
         subtasks.clear();
     }
 
-    //возвращает задачу по идентификатору или null, если задачи с таким идентификатором нет
+    //возвращает подзадачу по идентификатору или null, если задачи с таким идентификатором нет
     public Subtask getSubtask(int id) {
         return subtasks.get(id);
     }
 
-    //добавляет задачу, если такой ещё нет
-    public void addSubtask(Subtask subtask) {
-        if(subtask == null) {
+    //добавляет подзадачу, если есть эпик, в который её нужно добавить
+    public Subtask addSubtask(Subtask subtask) {
+        if (subtask == null) {
+            return null;
+        }
+        int epicId = subtask.getEpicId();
+        Epic epic = epics.get(epicId);
+        if (epic == null) {
+            return null;
+        }
+        int id = generateNextId();
+        subtask.setId(id);
+        subtasks.put(id, subtask);
+        epic.addSubtask(id);
+        updateEpicStatus(epic);
+        return subtask;
+    }
+
+    //обновляет подзадачу, если подзадача с таким id есть, и она относится к тому же эпику
+    public void updateSubtask(Subtask subtask) {
+        if (subtask == null) {
             return;
         }
         int id = subtask.getId();
-        subtasks.putIfAbsent(id, subtask);
-    }
-
-    //обновляет задачу, если такая есть
-    public void updateSubtask(Subtask subtask) {
-        int id = subtask.getId();
-        subtasks.replace(id, subtask);
-        Epic epic = subtask.getEpic();
-        if(epic != null) {
-            epic.updateSubtask(subtask);
+        Subtask previous = subtasks.get(id);
+        if (previous == null || subtask.getEpicId() != previous.getEpicId()) {
+            //подзадачи с таким id нет или эпик в новой версии отличается
+            return;
+        }
+        subtasks.put(id, subtask);
+        Epic epic = epics.get(subtask.getEpicId());
+        if (epic != null) {
+            updateEpicStatus(epic);
         }
     }
 
     public void removeSubtask(int id) {
         Subtask subtask = subtasks.remove(id);
-        if(subtask == null) {
+        if (subtask == null) {
             return;
         }
-        Epic epic = subtask.getEpic();
-        if(epic != null) {
-            epic.removeSubtask(subtask);
+        int epicId = subtask.getEpicId();
+        Epic epic = epics.get(epicId);
+        if (epic != null) {
+            epic.removeSubtask(id);
+            updateEpicStatus(epic);
         }
     }
 
     public ArrayList<Epic> getEpics() {
-        ArrayList<Epic> result = new ArrayList<>();
-        for(Epic epic : epics.values()) {
-            result.add(epic);
-        }
-        return result;
+        return new ArrayList<>(epics.values());
     }
 
     public void clearEpics() {
-        for (Epic epic : epics.values()) {
-            tryRemoveEpicsSubtasks(epic);
-        }
         epics.clear();
+        subtasks.clear();
     }
 
-    //возвращает задачу по идентификатору или null, если задачи с таким идентификатором нет
+    //возвращает эпик по идентификатору или null, если эпика с таким идентификатором нет
     public Epic getEpic(int id) {
         return epics.get(id);
     }
 
-    //добавляет задачу, если такой ещё нет
-    public void addEpic(Epic epic) {
-        if(epic == null) {
+    public Epic addEpic(Epic epic) {
+        if (epic == null) {
+            return null;
+        }
+        int id = generateNextId();
+        epic.setId(id);
+        epics.put(id, epic);
+        updateEpicStatus(epic);
+        return epic;
+    }
+
+    //обновляет эпик, если эпик с таким id есть
+    public void updateEpic(Epic epic) {
+        if (epic == null) {
             return;
         }
         int id = epic.getId();
-        epics.putIfAbsent(id, epic);
-    }
-
-    //обновляет задачу, если такая есть
-    //TODO обновить ссылки на эпик в подзадачах
-    public void updateEpic(Epic epic) {
-        int id = epic.getId();
         epics.replace(id, epic);
-        //for()
+        updateEpicStatus(epic);
     }
 
     public void removeEpic(int id) {
         Epic epic = epics.remove(id);
-        tryRemoveEpicsSubtasks(epic);
+        if (epic == null) {
+            return;
+        }
+        for (Integer subtaskId : epic.getSubtaskIds()) {
+            subtasks.remove(subtaskId);
+        }
     }
 
     public ArrayList<Subtask> getEpicsSubtasks(int epicId) {
         Epic epic = epics.get(epicId);
-        if(epic == null) {
+        if (epic == null) {
             return new ArrayList<>();
         }
-        return epic.getSubtasks();
+        ArrayList<Subtask> result = new ArrayList<>();
+        for (Integer subtaskId : epic.getSubtaskIds()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask != null) {
+                result.add(subtask);
+            }
+        }
+        return result;
     }
 
-    //TODO надо подумать, нужно ли обнулять ссылку на эпик у подзадачи
-    private void tryRemoveEpicsSubtasks(Epic epic) {
-        if(epic == null) {
+    private void updateEpicStatus(Epic epic) {
+        if (epic == null) {
             return;
         }
-        for (Subtask subtask : epic.getSubtasks()) {
-            //subtask.setEpic(null);
-            subtasks.remove(subtask.getId());
+        ArrayList<Integer> subtaskStatuses = new ArrayList<>();
+        for (Integer subtaskId : epic.getSubtaskIds()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask != null) {
+                subtaskStatuses.add(subtask.status);
+            }
         }
+        epic.updateStatus(subtaskStatuses);
     }
-
-//    @Override
-//    public String toString() {
-//        String result =  "TaskManager{" +
-//                "\ntasks=[";
-//        for (Task task : tasks.values()) {
-//            result += '\n' + Objects.toString(task);
-//        }
-//        result += "]\nsubtasks=[";
-//        for (Subtask subtask : subtasks.values()) {
-//            result += '\n' + Objects.toString(subtask);
-//        }
-//        result += "]\nepics=[";
-//        for (Epic epic : epics.values()) {
-//            result += '\n' + Objects.toString(epic);
-//        }
-//        result += "]\n}";
-//        return result;
-//    }
 }
