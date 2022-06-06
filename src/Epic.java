@@ -29,17 +29,17 @@ public class Epic extends Task {
 
     public void updateStatus(ArrayList<Integer> subtaskStatuses) {
         if (subtaskStatuses == null || subtaskStatuses.isEmpty()) {
-            status = STATUS_NEW;
+            setStatus(STATUS_NEW);
             return;
         }
         int subtasksStatus = subtaskStatuses.get(0);
         for (int i = 1; i < subtaskStatuses.size(); i++) {
             if (subtaskStatuses.get(i) != subtasksStatus) {
-                status = STATUS_IN_PROGRESS;
+                setStatus(STATUS_IN_PROGRESS);
                 return;
             }
         }
-        status = subtasksStatus;
+        setStatus(subtasksStatus);
     }
 
     @Override

@@ -190,7 +190,7 @@ public class TaskManager {
         for (Integer subtaskId : epic.getSubtaskIds()) {
             Subtask subtask = subtasks.get(subtaskId);
             if (subtask != null) {
-                subtaskStatuses.add(subtask.status);
+                subtaskStatuses.add(subtask.getStatus());
             }
         }
         epic.updateStatus(subtaskStatuses);
