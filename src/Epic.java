@@ -19,27 +19,12 @@ public class Epic extends Task {
         }
     }
 
-    public void removeSubtask(int subtaskId) {
-        subtaskIds.remove(Integer.valueOf(subtaskId));  //явная упаковка чтобы subtaskId не воспринимался как индекс
+    public void removeSubtask(Integer subtaskId) {
+        subtaskIds.remove(subtaskId);
     }
 
     public void clearSubtasks() {
         subtaskIds.clear();
-    }
-
-    public void updateStatus(ArrayList<Integer> subtaskStatuses) {
-        if (subtaskStatuses == null || subtaskStatuses.isEmpty()) {
-            setStatus(STATUS_NEW);
-            return;
-        }
-        int subtasksStatus = subtaskStatuses.get(0);
-        for (int i = 1; i < subtaskStatuses.size(); i++) {
-            if (subtaskStatuses.get(i) != subtasksStatus) {
-                setStatus(STATUS_IN_PROGRESS);
-                return;
-            }
-        }
-        setStatus(subtasksStatus);
     }
 
     @Override

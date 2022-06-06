@@ -94,6 +94,18 @@ public class Main {
         taskManager.addSubtask(new Subtask(0, "NEW SUBTASK", "", Task.STATUS_DONE, epicId1));
         printAllTasks(taskManager);
 
+        epic = new Epic(0, "New Epic", "some description");
+        epic.addSubtask(0);
+        epic.addSubtask(100);
+        epic.addSubtask(101);
+        int epicId = taskManager.addEpic(epic).getId();
+        taskManager.addSubtask(new Subtask(0, "new subtask 1", "", Task.STATUS_IN_PROGRESS, epicId));
+        epic.addSubtask(55);
+        taskManager.addSubtask(new Subtask(0, "new subtask 2", "", Task.STATUS_DONE, epicId));
+        taskManager.addSubtask(new Subtask(0, "new subtask 3", "", Task.STATUS_DONE, epicId));
+        epic.addSubtask(70);
+
+        printAllTasks(taskManager);
     }
 
     private static void printAllTasks(TaskManager taskManager) {

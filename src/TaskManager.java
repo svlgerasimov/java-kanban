@@ -12,7 +12,6 @@ public class TaskManager {
         tasks = new HashMap<>();
         epics = new HashMap<>();
         subtasks = new HashMap<>();
-        nextId = 0;
     }
 
     private int generateNextId() {
@@ -186,13 +185,31 @@ public class TaskManager {
         if (epic == null) {
             return;
         }
-        ArrayList<Integer> subtaskStatuses = new ArrayList<>();
-        for (Integer subtaskId : epic.getSubtaskIds()) {
-            Subtask subtask = subtasks.get(subtaskId);
-            if (subtask != null) {
-                subtaskStatuses.add(subtask.getStatus());
+        ArrayList<Integer> subtaskIds = epic.getSubtaskIds();
+        int epicStatus = Task.STATUS_NEW;
+        int firstIndex = 0;
+        // Если в эпике оказались id задач, которых почему-то нет в менеджере, ищем первую "существующую" подзадачу
+        for(int i = 0; i < subtaskIds.size(); i++) {
+            firstIndex = i;
+            Subtask subtask = subtasks.get(subtaskIds.get(i));
+            if(subtask != null) {
+                epicStatus = subtask.getStatus();
+                break;
             }
         }
-        epic.updateStatus(subtaskStatuses);
+        if(epicStatus != Task.STATUS_IN_PROGRESS) {
+            // Если есть подзадача IN PROGRESS, то и эпик в любом случае IN PROGRESS
+            for (int i = firstIndex + 1; i < subtaskIds.size(); i++) {
+                // Сравниваем со следующими "существующими" подзадачами
+                Subtask subtask = subtasks.get(subtaskIds.get(i));
+                if (subtask != null) {
+                    if (subtask.getStatus() != epicStatus) {
+                        epicStatus = Task.STATUS_IN_PROGRESS;
+                        break;
+                    }
+                }
+            }
+        }
+        epic.setStatus(epicStatus);
     }
 }
