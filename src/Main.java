@@ -99,7 +99,7 @@ public class Main {
         epic.addSubtask(100);
         epic.addSubtask(101);
         int epicId = taskManager.addEpic(epic).getId();
-        taskManager.addSubtask(new Subtask(0, "new subtask 1", "", Task.STATUS_IN_PROGRESS, epicId));
+        taskManager.addSubtask(new Subtask(0, "new subtask 1", "", Task.STATUS_DONE, epicId));
         epic.addSubtask(55);
         taskManager.addSubtask(new Subtask(0, "new subtask 2", "", Task.STATUS_DONE, epicId));
         taskManager.addSubtask(new Subtask(0, "new subtask 3", "", Task.STATUS_DONE, epicId));

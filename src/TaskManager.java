@@ -185,31 +185,34 @@ public class TaskManager {
         if (epic == null) {
             return;
         }
-        ArrayList<Integer> subtaskIds = epic.getSubtaskIds();
-        int epicStatus = Task.STATUS_NEW;
-        int firstIndex = 0;
-        // Если в эпике оказались id задач, которых почему-то нет в менеджере, ищем первую "существующую" подзадачу
-        for(int i = 0; i < subtaskIds.size(); i++) {
-            firstIndex = i;
-            Subtask subtask = subtasks.get(subtaskIds.get(i));
-            if(subtask != null) {
-                epicStatus = subtask.getStatus();
-                break;
+        int validSubtasks = 0;
+        int newSubtasks = 0;
+        int doneSubtasks = 0;
+
+        for (Integer subtaskId : epic.getSubtaskIds()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if(subtask == null) {
+                continue;
+            }
+            validSubtasks++;
+            int subtaskStatus = subtask.getStatus();
+            if(subtaskStatus == Task.STATUS_IN_PROGRESS) {
+                epic.setStatus(Task.STATUS_IN_PROGRESS);
+                return;
+            }
+            if(subtaskStatus == Task.STATUS_NEW) {
+                newSubtasks++;
+            } else if(subtaskStatus == Task.STATUS_DONE) {
+                doneSubtasks++;
             }
         }
-        if(epicStatus != Task.STATUS_IN_PROGRESS) {
-            // Если есть подзадача IN PROGRESS, то и эпик в любом случае IN PROGRESS
-            for (int i = firstIndex + 1; i < subtaskIds.size(); i++) {
-                // Сравниваем со следующими "существующими" подзадачами
-                Subtask subtask = subtasks.get(subtaskIds.get(i));
-                if (subtask != null) {
-                    if (subtask.getStatus() != epicStatus) {
-                        epicStatus = Task.STATUS_IN_PROGRESS;
-                        break;
-                    }
-                }
-            }
+
+        if(validSubtasks == 0 || newSubtasks == validSubtasks) {
+            epic.setStatus(Task.STATUS_NEW);
+        } else if(doneSubtasks == validSubtasks) {
+            epic.setStatus(Task.STATUS_DONE);
+        } else {
+            epic.setStatus(Task.STATUS_IN_PROGRESS);
         }
-        epic.setStatus(epicStatus);
     }
 }
