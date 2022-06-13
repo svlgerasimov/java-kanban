@@ -5,7 +5,7 @@ public class Epic extends Task {
 
     //в конструкторе нет статуса, т.к. он рассчитывается на основе подзадач
     public Epic(int id, String name, String description) {
-        super(id, name, description, Task.STATUS_NEW);
+        super(id, name, description, TaskStatus.NEW);
         subtaskIds = new ArrayList<>();
     }
 

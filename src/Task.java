@@ -1,14 +1,14 @@
 public class Task {
-    public static final int STATUS_NEW = 1;
-    public static final int STATUS_IN_PROGRESS = 2;
-    public static final int STATUS_DONE = 3;
+//    public static final int STATUS_NEW = 1;
+//    public static final int STATUS_IN_PROGRESS = 2;
+//    public static final int STATUS_DONE = 3;
 
     private String name;
     private String description;
     private int id;
-    private int status;
+    private TaskStatus status;
 
-    public Task(int id, String name, String description, int status) {
+    public Task(int id, String name, String description, TaskStatus status) {
         this.name = name;
         this.description = description;
         this.id = id;
@@ -31,11 +31,11 @@ public class Task {
         this.id = id;
     }
 
-    public int getStatus() {
+    public TaskStatus getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(TaskStatus status) {
         this.status = status;
     }
 
@@ -45,25 +45,7 @@ public class Task {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", status=" + statusText() +
+                ", status=" + status +
                 '}';
-    }
-
-    public String statusText() {
-        String result;
-        switch (status) {
-            case STATUS_NEW:
-                result = "NEW";
-                break;
-            case STATUS_IN_PROGRESS:
-                result = "IN_PROGRESS";
-                break;
-            case STATUS_DONE:
-                result = "DONE";
-                break;
-            default:
-                result = "UNDEFINED";
-        }
-        return result;
     }
 }

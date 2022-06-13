@@ -9,17 +9,17 @@ public class Main {
 
 
         int taskId1 = taskManager.addTask(new Task(0,
-                "Задача 1", "Описание задачи 1", Task.STATUS_NEW)).getId();
+                "Задача 1", "Описание задачи 1", TaskStatus.NEW)).getId();
         int taskId2 = taskManager.addTask(new Task(0,
-                "Задача 2", "Описание задачи 2", Task.STATUS_NEW)).getId();
+                "Задача 2", "Описание задачи 2", TaskStatus.NEW)).getId();
         int taskId3 = taskManager.addTask(new Task(0,
-                "Задача 3", "Описание задачи 3", Task.STATUS_DONE)).getId();
+                "Задача 3", "Описание задачи 3", TaskStatus.DONE)).getId();
 
         printAllTasks(taskManager);
 
         Task task = taskManager.getTask(taskId2);
         taskManager.updateTask(new Task(task.getId(),
-                task.getName() + " updated", task.getDescription(), Task.STATUS_IN_PROGRESS));
+                task.getName() + " updated", task.getDescription(), TaskStatus.IN_PROGRESS));
         taskManager.getTask(taskId1);
         taskManager.getTask(taskId2);
         taskManager.removeTask(taskId1);
@@ -34,19 +34,19 @@ public class Main {
         int epicId4 = taskManager.addEpic(new Epic(0, "Эпик 4", "Описание Эпика 4")).getId();
 
         int subtaskId1 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 1", "Описание подзадачи 1", Task.STATUS_NEW, epicId1)).getId();
+                "Подзадача 1", "Описание подзадачи 1", TaskStatus.NEW, epicId1)).getId();
         int subtaskId2 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 2", "Описание подзадачи 2", Task.STATUS_DONE, epicId2)).getId();
+                "Подзадача 2", "Описание подзадачи 2", TaskStatus.DONE, epicId2)).getId();
         int subtaskId3 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 3", "Описание подзадачи 3", Task.STATUS_DONE, epicId2)).getId();
+                "Подзадача 3", "Описание подзадачи 3", TaskStatus.DONE, epicId2)).getId();
         int subtaskId4 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 4", "Описание подзадачи 4", Task.STATUS_DONE, epicId4)).getId();
+                "Подзадача 4", "Описание подзадачи 4", TaskStatus.DONE, epicId4)).getId();
 
         printAllTasks(taskManager);
 
         Subtask subtask = taskManager.getSubtask(subtaskId1);
         subtask = new Subtask(subtask.getId(), subtask.getName() + " (updated)",
-                subtask.getDescription(), Task.STATUS_NEW, subtask.getEpicId());
+                subtask.getDescription(), TaskStatus.NEW, subtask.getEpicId());
         taskManager.updateSubtask(subtask);
 
         subtask = taskManager.getSubtask(subtaskId2);
@@ -56,7 +56,7 @@ public class Main {
 
         subtask = taskManager.getSubtask(subtaskId3);
         subtask = new Subtask(subtask.getId(), subtask.getName() + " (updated)",
-                subtask.getDescription(), Task.STATUS_IN_PROGRESS, subtask.getEpicId());
+                subtask.getDescription(), TaskStatus.IN_PROGRESS, subtask.getEpicId());
         taskManager.updateSubtask(subtask);
 
         taskManager.removeSubtask(subtaskId4);
@@ -82,19 +82,19 @@ public class Main {
         taskManager.removeEpic(epicId2);
         printAllTasks(taskManager);
 
-        taskManager.addSubtask(new Subtask(0, "NEW SUBTASK", "", Task.STATUS_DONE, epicId1));
+        taskManager.addSubtask(new Subtask(0, "NEW SUBTASK", "", TaskStatus.DONE, epicId1));
         printAllTasks(taskManager);
 
         taskManager.clearSubtasks();
         printAllTasks(taskManager);
 
-        taskManager.addSubtask(new Subtask(0, "NEW SUBTASK", "", Task.STATUS_DONE, epicId1));
+        taskManager.addSubtask(new Subtask(0, "NEW SUBTASK", "", TaskStatus.DONE, epicId1));
         printAllTasks(taskManager);
 
         taskManager.clearEpics();
         printAllTasks(taskManager);
 
-        taskManager.addSubtask(new Subtask(0, "NEW SUBTASK", "", Task.STATUS_DONE, epicId1));
+        taskManager.addSubtask(new Subtask(0, "NEW SUBTASK", "", TaskStatus.DONE, epicId1));
         printAllTasks(taskManager);
 
         epic = new Epic(0, "New Epic", "some description");
@@ -102,10 +102,10 @@ public class Main {
         epic.addSubtask(100);
         epic.addSubtask(101);
         int epicId = taskManager.addEpic(epic).getId();
-        taskManager.addSubtask(new Subtask(0, "new subtask 1", "", Task.STATUS_DONE, epicId));
+        taskManager.addSubtask(new Subtask(0, "new subtask 1", "", TaskStatus.DONE, epicId));
         epic.addSubtask(55);
-        taskManager.addSubtask(new Subtask(0, "new subtask 2", "", Task.STATUS_DONE, epicId));
-        taskManager.addSubtask(new Subtask(0, "new subtask 3", "", Task.STATUS_DONE, epicId));
+        taskManager.addSubtask(new Subtask(0, "new subtask 2", "", TaskStatus.DONE, epicId));
+        taskManager.addSubtask(new Subtask(0, "new subtask 3", "", TaskStatus.DONE, epicId));
         epic.addSubtask(70);
 
         printAllTasks(taskManager);
@@ -114,13 +114,13 @@ public class Main {
 
         taskManager.clearEpics();
 
-        taskId1 = taskManager.addTask(new Task(0, "new task 1", "", Task.STATUS_NEW)).getId();
+        taskId1 = taskManager.addTask(new Task(0, "new task 1", "", TaskStatus.NEW)).getId();
         epicId1 =  taskManager.addEpic(new Epic(0, "new subtask 1", "")).getId();
         subtaskId1 = taskManager.addSubtask(
-                new Subtask(0, "new subtask 1", "", Task.STATUS_NEW, epicId1))
+                new Subtask(0, "new subtask 1", "", TaskStatus.NEW, epicId1))
                 .getId();
         subtaskId2 = taskManager.addSubtask(
-                        new Subtask(0, "new subtask 2", "", Task.STATUS_NEW, epicId1))
+                        new Subtask(0, "new subtask 2", "", TaskStatus.NEW, epicId1))
                 .getId();
 
         printAllTasks(taskManager);
@@ -130,9 +130,9 @@ public class Main {
         taskManager.getEpic(epicId1);
         printHistory(taskManager);
 
-        taskManager.updateTask(new Task(taskId1, "updated task 1", "", Task.STATUS_IN_PROGRESS));
+        taskManager.updateTask(new Task(taskId1, "updated task 1", "", TaskStatus.IN_PROGRESS));
         taskManager.updateSubtask(new Subtask(subtaskId1, "updated subtask 1", "",
-                Task.STATUS_DONE, epicId1));
+                TaskStatus.DONE, epicId1));
         taskManager.getTask(taskId1);
         taskManager.getSubtask(subtaskId1);
         taskManager.getSubtask(subtaskId2);
