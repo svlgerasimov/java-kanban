@@ -43,7 +43,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "ru.yandex.practicum.kanban.Task.Task{" +
+        return "Task{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

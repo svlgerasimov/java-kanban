@@ -14,7 +14,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        String result = "ru.yandex.practicum.kanban.Task.Subtask{" +
+        String result = "Subtask{" +
                 super.toString() +
                 ", epicId=" + epicId;
         result += '}';

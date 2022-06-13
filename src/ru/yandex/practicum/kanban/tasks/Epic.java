@@ -31,7 +31,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "ru.yandex.practicum.kanban.Task.Epic{" +
+        return "Epic{" +
                 super.toString() +
                 ", subtaskIds=" + subtaskIds + "}";
     }
