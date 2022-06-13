@@ -1,3 +1,5 @@
+package ru.yandex.practicum.kanban.tasks;
+
 public class Task {
 //    public static final int STATUS_NEW = 1;
 //    public static final int STATUS_IN_PROGRESS = 2;
@@ -41,7 +43,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
+        return "ru.yandex.practicum.kanban.Task.Task{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
