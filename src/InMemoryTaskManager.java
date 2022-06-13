@@ -1,17 +1,21 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
+    public static final int HISTORY_SIZE = 10;
     private HashMap<Integer, Task> tasks;
     private HashMap<Integer, Epic> epics;
     private HashMap<Integer, Subtask> subtasks;
-
+    private List<Task> history;
     private int nextId;
 
     public InMemoryTaskManager() {
         tasks = new HashMap<>();
         epics = new HashMap<>();
         subtasks = new HashMap<>();
+        history = new LinkedList<>();
     }
 
     private int generateNextId() {
@@ -31,7 +35,9 @@ public class InMemoryTaskManager implements TaskManager {
     //возвращает задачу по идентификатору или null, если задачи с таким идентификатором нет
     @Override
     public Task getTask(int id) {
-        return tasks.get(id);
+        Task task = tasks.get(id);
+        addHistoryItem(task);
+        return task;
     }
 
     //добавляет задачу, назначая ей id
@@ -78,7 +84,9 @@ public class InMemoryTaskManager implements TaskManager {
     //возвращает подзадачу по идентификатору или null, если задачи с таким идентификатором нет
     @Override
     public Subtask getSubtask(int id) {
-        return subtasks.get(id);
+        Subtask subtask = subtasks.get(id);
+        addHistoryItem(subtask);
+        return subtask;
     }
 
     //добавляет подзадачу, если есть эпик, в который её нужно добавить
@@ -147,7 +155,9 @@ public class InMemoryTaskManager implements TaskManager {
     //возвращает эпик по идентификатору или null, если эпика с таким идентификатором нет
     @Override
     public Epic getEpic(int id) {
-        return epics.get(id);
+        Epic epic = epics.get(id);
+        addHistoryItem(epic);
+        return epic;
     }
 
     @Override
@@ -233,5 +243,20 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Task.STATUS_IN_PROGRESS);
         }
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return history;
+    }
+
+    private void addHistoryItem(Task task) {
+        if (task == null) {
+            return;
+        }
+        if (history.size() >= HISTORY_SIZE) {
+            history.remove(0);
+        }
+        history.add(task);
     }
 }

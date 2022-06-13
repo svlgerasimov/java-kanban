@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
@@ -19,6 +20,8 @@ public class Main {
         Task task = taskManager.getTask(taskId2);
         taskManager.updateTask(new Task(task.getId(),
                 task.getName() + " updated", task.getDescription(), Task.STATUS_IN_PROGRESS));
+        taskManager.getTask(taskId1);
+        taskManager.getTask(taskId2);
         taskManager.removeTask(taskId1);
         printAllTasks(taskManager);
 
@@ -106,6 +109,36 @@ public class Main {
         epic.addSubtask(70);
 
         printAllTasks(taskManager);
+
+        printHistory(taskManager);
+
+        taskManager.clearEpics();
+
+        taskId1 = taskManager.addTask(new Task(0, "new task 1", "", Task.STATUS_NEW)).getId();
+        epicId1 =  taskManager.addEpic(new Epic(0, "new subtask 1", "")).getId();
+        subtaskId1 = taskManager.addSubtask(
+                new Subtask(0, "new subtask 1", "", Task.STATUS_NEW, epicId1))
+                .getId();
+        subtaskId2 = taskManager.addSubtask(
+                        new Subtask(0, "new subtask 2", "", Task.STATUS_NEW, epicId1))
+                .getId();
+
+        printAllTasks(taskManager);
+        taskManager.getTask(taskId1);
+        taskManager.getSubtask(subtaskId1);
+        taskManager.getSubtask(subtaskId2);
+        taskManager.getEpic(epicId1);
+        printHistory(taskManager);
+
+        taskManager.updateTask(new Task(taskId1, "updated task 1", "", Task.STATUS_IN_PROGRESS));
+        taskManager.updateSubtask(new Subtask(subtaskId1, "updated subtask 1", "",
+                Task.STATUS_DONE, epicId1));
+        taskManager.getTask(taskId1);
+        taskManager.getSubtask(subtaskId1);
+        taskManager.getSubtask(subtaskId2);
+        taskManager.getEpic(epicId1);
+        printAllTasks(taskManager);
+        printHistory(taskManager);
     }
 
     private static void printAllTasks(TaskManager taskManager) {
@@ -124,6 +157,15 @@ public class Main {
         System.out.println("Epics:");
         for (Epic epic : epics) {
             System.out.println(epic);
+        }
+        System.out.println("------------------");
+    }
+
+    private static void printHistory(TaskManager taskManager) {
+        System.out.println("История просмотров задач");
+        List<Task> history = taskManager.getHistory();
+        for (int i = 0; i < history.size(); i++) {
+            System.out.println(i + ". " + history.get(i));
         }
         System.out.println("------------------");
     }
