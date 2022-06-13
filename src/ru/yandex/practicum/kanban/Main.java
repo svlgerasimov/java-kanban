@@ -14,7 +14,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager taskManager = new Managers().getDefault();
+        TaskManager taskManager = Managers.getDefault();
 
 
         int taskId1 = taskManager.addTask(new Task(0,

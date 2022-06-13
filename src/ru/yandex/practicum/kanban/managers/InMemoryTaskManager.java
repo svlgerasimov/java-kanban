@@ -7,22 +7,20 @@ import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
-    public static final int HISTORY_SIZE = 10;
     private HashMap<Integer, Task> tasks;
     private HashMap<Integer, Epic> epics;
     private HashMap<Integer, Subtask> subtasks;
-    private List<Task> history;
+    private HistoryManager historyManager;
     private int nextId;
 
     public InMemoryTaskManager() {
         tasks = new HashMap<>();
         epics = new HashMap<>();
         subtasks = new HashMap<>();
-        history = new LinkedList<>();
+        historyManager = Managers.getDefaultHistory();
     }
 
     private int generateNextId() {
@@ -43,7 +41,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
-        addHistoryItem(task);
+        historyManager.add(task);
         return task;
     }
 
@@ -92,7 +90,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtask(int id) {
         Subtask subtask = subtasks.get(id);
-        addHistoryItem(subtask);
+        historyManager.add(subtask);
         return subtask;
     }
 
@@ -163,7 +161,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpic(int id) {
         Epic epic = epics.get(id);
-        addHistoryItem(epic);
+        historyManager.add(epic);
         return epic;
     }
 
@@ -254,16 +252,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getHistory() {
-        return history;
+        return historyManager.getHistory();
     }
 
-    private void addHistoryItem(Task task) {
-        if (task == null) {
-            return;
-        }
-        if (history.size() >= HISTORY_SIZE) {
-            history.remove(0);
-        }
-        history.add(task);
-    }
 }
