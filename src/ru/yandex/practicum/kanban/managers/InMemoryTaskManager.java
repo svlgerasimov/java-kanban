@@ -8,11 +8,12 @@ import ru.yandex.practicum.kanban.tasks.TaskStatus;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private HashMap<Integer, Task> tasks;
-    private HashMap<Integer, Epic> epics;
-    private HashMap<Integer, Subtask> subtasks;
+    private Map<Integer, Task> tasks;
+    private Map<Integer, Epic> epics;
+    private Map<Integer, Subtask> subtasks;
     private HistoryManager historyManager;
     private int nextId;
 

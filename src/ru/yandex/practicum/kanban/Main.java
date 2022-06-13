@@ -106,7 +106,7 @@ public class Main {
         taskManager.addSubtask(new Subtask(0, "NEW SUBTASK", "", TaskStatus.DONE, epicId1));
         printAllTasks(taskManager);
 
-        epic = new Epic(0, "New ru.yandex.practicum.kanban.Task.Epic", "some description");
+        epic = new Epic(0, "New Epic", "some description");
         epic.addSubtask(0);
         epic.addSubtask(100);
         epic.addSubtask(101);
