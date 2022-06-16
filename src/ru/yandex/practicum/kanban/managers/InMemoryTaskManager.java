@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private Map<Integer, Task> tasks;
-    private Map<Integer, Epic> epics;
-    private Map<Integer, Subtask> subtasks;
-    private HistoryManager historyManager;
+    private final Map<Integer, Task> tasks;
+    private final Map<Integer, Epic> epics;
+    private final Map<Integer, Subtask> subtasks;
+    private final HistoryManager historyManager;
     private int nextId;
 
     public InMemoryTaskManager() {
@@ -226,25 +226,25 @@ public class InMemoryTaskManager implements TaskManager {
 
         for (Integer subtaskId : epic.getSubtaskIds()) {
             Subtask subtask = subtasks.get(subtaskId);
-            if(subtask == null) {
+            if (subtask == null) {
                 continue;
             }
             validSubtasks++;
             TaskStatus subtaskStatus = subtask.getStatus();
-            if(TaskStatus.IN_PROGRESS.equals(subtaskStatus)) {
+            if (TaskStatus.IN_PROGRESS.equals(subtaskStatus)) {
                 epic.setStatus(TaskStatus.IN_PROGRESS);
                 return;
             }
-            if(TaskStatus.NEW.equals(subtaskStatus)) {
+            if (TaskStatus.NEW.equals(subtaskStatus)) {
                 newSubtasks++;
-            } else if(TaskStatus.DONE.equals(subtaskStatus)) {
+            } else if (TaskStatus.DONE.equals(subtaskStatus)) {
                 doneSubtasks++;
             }
         }
 
-        if(validSubtasks == 0 || newSubtasks == validSubtasks) {
+        if (validSubtasks == 0 || newSubtasks == validSubtasks) {
             epic.setStatus(TaskStatus.NEW);
-        } else if(doneSubtasks == validSubtasks) {
+        } else if (doneSubtasks == validSubtasks) {
             epic.setStatus(TaskStatus.DONE);
         } else {
             epic.setStatus(TaskStatus.IN_PROGRESS);

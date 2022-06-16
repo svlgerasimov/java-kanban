@@ -1,9 +1,6 @@
 package ru.yandex.practicum.kanban.tasks;
 
 public class Task {
-//    public static final int STATUS_NEW = 1;
-//    public static final int STATUS_IN_PROGRESS = 2;
-//    public static final int STATUS_DONE = 3;
 
     private String name;
     private String description;

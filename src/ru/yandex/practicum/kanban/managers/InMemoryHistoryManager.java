@@ -5,10 +5,10 @@ import ru.yandex.practicum.kanban.tasks.Task;
 import java.util.LinkedList;
 import java.util.List;
 
-public class InMemoryHistoryManager implements HistoryManager{
+public class InMemoryHistoryManager implements HistoryManager {
     public static final int HISTORY_SIZE = 10;
 
-    private List<Task> history;
+    private final List<Task> history;
 
     public InMemoryHistoryManager() {
         history = new LinkedList<>();

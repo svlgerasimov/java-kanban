@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
-    private List<Integer> subtaskIds;
+    private final List<Integer> subtaskIds;
 
     //в конструкторе нет статуса, т.к. он рассчитывается на основе подзадач
     public Epic(int id, String name, String description) {
