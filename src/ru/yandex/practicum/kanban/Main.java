@@ -151,9 +151,9 @@ public class Main {
     }
 
     private static void printAllTasks(TaskManager taskManager) {
-        ArrayList<Task> tasks = taskManager.getTasks();
-        ArrayList<Subtask> subtasks = taskManager.getSubtasks();
-        ArrayList<Epic> epics = taskManager.getEpics();
+        List<Task> tasks = taskManager.getTasks();
+        List<Subtask> subtasks = taskManager.getSubtasks();
+        List<Epic> epics = taskManager.getEpics();
 
         System.out.println("Tasks:");
         for (Task task : tasks) {
