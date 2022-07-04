@@ -8,10 +8,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private Node head;
     private Node tail;
-    Map<Integer, Node> nodeMap;
+    private final Map<Integer, Node> nodesById;
 
     public InMemoryHistoryManager() {
-        nodeMap = new HashMap<>();
+        nodesById = new HashMap<>();
     }
 
     @Override
@@ -20,14 +20,14 @@ public class InMemoryHistoryManager implements HistoryManager {
             return;
         }
         Node newNode = linkLast(task);
-        Node oldNode = nodeMap.put(task.getId(), newNode);
+        Node oldNode = nodesById.put(task.getId(), newNode);
         removeNode(oldNode);   //проверка на null в removeNode
     }
 
     @Override
     public void remove(int id) {
         //Удаляем Task и из списка, и из словаря
-        Node node = nodeMap.remove(id);
+        Node node = nodesById.remove(id);
         removeNode(node);   //проверка на null в removeNode
     }
 
@@ -47,8 +47,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         Node node = new Node(task);
         if (head == null) {
             head = node;
-        }
-        if (tail != null) {
+        } else {
             tail.setNext(node);
             node.setPrev(tail);
         }
