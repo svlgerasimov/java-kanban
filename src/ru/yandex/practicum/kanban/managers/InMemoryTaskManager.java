@@ -35,7 +35,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearTasks() {
-        tasks.clear();
+        clearTasksFromMap(tasks);
+//        for (Integer id : tasks.keySet()) {
+//            historyManager.remove(id);
+//        }
+//        tasks.clear();
     }
 
     //возвращает задачу по идентификатору или null, если задачи с таким идентификатором нет
@@ -70,7 +74,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTask(int id) {
-        tasks.remove(id);
+//        tasks.remove(id);
+//        historyManager.remove(id);
+        removeTaskFromMap(tasks, id);
     }
 
     @Override
@@ -84,7 +90,11 @@ public class InMemoryTaskManager implements TaskManager {
             epic.clearSubtasks();
             updateEpicStatus(epic);
         }
-        subtasks.clear();
+        clearTasksFromMap(subtasks);
+//        for (Integer id : subtasks.keySet()) {
+//            historyManager.remove(id);
+//        }
+//        subtasks.clear();
     }
 
     //возвращает подзадачу по идентификатору или null, если задачи с таким идентификатором нет
@@ -135,7 +145,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeSubtask(int id) {
-        Subtask subtask = subtasks.remove(id);
+//        Subtask subtask = subtasks.remove(id);
+        Subtask subtask = removeTaskFromMap(subtasks, id);
         if (subtask == null) {
             return;
         }
@@ -145,6 +156,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.removeSubtask(id);
             updateEpicStatus(epic);
         }
+//        historyManager.remove(id);
     }
 
     @Override
@@ -154,8 +166,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearEpics() {
-        epics.clear();
-        subtasks.clear();
+//        epics.clear();
+//        subtasks.clear();
+        clearTasksFromMap(epics);
+        clearTasksFromMap(subtasks);
     }
 
     //возвращает эпик по идентификатору или null, если эпика с таким идентификатором нет
@@ -191,12 +205,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeEpic(int id) {
-        Epic epic = epics.remove(id);
+        Epic epic = removeTaskFromMap(epics, id);
+        //Epic epic = epics.remove(id);
         if (epic == null) {
             return;
         }
         for (Integer subtaskId : epic.getSubtaskIds()) {
-            subtasks.remove(subtaskId);
+            removeTaskFromMap(subtasks, subtaskId);
+            //subtasks.remove(subtaskId);
         }
     }
 
@@ -254,6 +270,18 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    private <V extends Task> V removeTaskFromMap(Map<Integer, V> map, int id) {
+        historyManager.remove(id);
+        return map.remove(id);
+    }
+
+    private <V extends Task> void clearTasksFromMap(Map<Integer, V> map) {
+        for (Integer id : map.keySet()) {
+            historyManager.remove(id);
+        }
+        map.clear();
     }
 
 }
