@@ -36,10 +36,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void clearTasks() {
         clearTasksFromMap(tasks);
-//        for (Integer id : tasks.keySet()) {
-//            historyManager.remove(id);
-//        }
-//        tasks.clear();
     }
 
     //возвращает задачу по идентификатору или null, если задачи с таким идентификатором нет
@@ -74,8 +70,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTask(int id) {
-//        tasks.remove(id);
-//        historyManager.remove(id);
         removeTaskFromMap(tasks, id);
     }
 
@@ -91,10 +85,6 @@ public class InMemoryTaskManager implements TaskManager {
             updateEpicStatus(epic);
         }
         clearTasksFromMap(subtasks);
-//        for (Integer id : subtasks.keySet()) {
-//            historyManager.remove(id);
-//        }
-//        subtasks.clear();
     }
 
     //возвращает подзадачу по идентификатору или null, если задачи с таким идентификатором нет
@@ -145,7 +135,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeSubtask(int id) {
-//        Subtask subtask = subtasks.remove(id);
         Subtask subtask = removeTaskFromMap(subtasks, id);
         if (subtask == null) {
             return;
@@ -156,7 +145,6 @@ public class InMemoryTaskManager implements TaskManager {
             epic.removeSubtask(id);
             updateEpicStatus(epic);
         }
-//        historyManager.remove(id);
     }
 
     @Override
@@ -166,8 +154,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearEpics() {
-//        epics.clear();
-//        subtasks.clear();
         clearTasksFromMap(epics);
         clearTasksFromMap(subtasks);
     }
@@ -206,13 +192,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpic(int id) {
         Epic epic = removeTaskFromMap(epics, id);
-        //Epic epic = epics.remove(id);
         if (epic == null) {
             return;
         }
         for (Integer subtaskId : epic.getSubtaskIds()) {
             removeTaskFromMap(subtasks, subtaskId);
-            //subtasks.remove(subtaskId);
         }
     }
 
