@@ -43,6 +43,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         return result;
     }
 
+    @Override
+    public void clearHistory() {
+        nodesById.clear();
+        head = null;
+        tail = null;
+    }
+
     //Добавляет узел в конец списка
     private Node linkLast(Task task) {
         Node node = new Node(task);

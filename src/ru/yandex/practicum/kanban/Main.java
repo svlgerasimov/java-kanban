@@ -2,11 +2,13 @@ package ru.yandex.practicum.kanban;
 
 import ru.yandex.practicum.kanban.managers.Managers;
 import ru.yandex.practicum.kanban.managers.TaskManager;
+import ru.yandex.practicum.kanban.managers.filebacked.FileBackedTaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public class Main {
@@ -14,6 +16,7 @@ public class Main {
     public static void main(String[] args) {
 
         TaskManager taskManager = Managers.getDefault();
+        taskManager = new FileBackedTaskManager(Path.of("resources", "taskManager"));
 
         int taskId1 = taskManager.addTask(new Task(0,
                 "Задача 1", "Задача 1", TaskStatus.NEW)).getId();
@@ -59,23 +62,23 @@ public class Main {
 
         printHistory(taskManager);
 
-        System.out.println("Remove subtask " + subtaskId2);
-        taskManager.removeSubtask(subtaskId2);
-        System.out.println("------------------");
-        printAllTasks(taskManager);
-        printHistory(taskManager);
-
-        System.out.println("Remove epic " + epicId1);
-        taskManager.removeEpic(epicId1);
-        System.out.println("------------------");
-        printAllTasks(taskManager);
-        printHistory(taskManager);
-
-        System.out.println("Remove task " + taskId1);
-        taskManager.removeTask(taskId1);
-        System.out.println("------------------");
-        printAllTasks(taskManager);
-        printHistory(taskManager);
+//        System.out.println("Remove subtask " + subtaskId2);
+//        taskManager.removeSubtask(subtaskId2);
+//        System.out.println("------------------");
+//        printAllTasks(taskManager);
+//        printHistory(taskManager);
+//
+//        System.out.println("Remove epic " + epicId1);
+//        taskManager.removeEpic(epicId1);
+//        System.out.println("------------------");
+//        printAllTasks(taskManager);
+//        printHistory(taskManager);
+//
+//        System.out.println("Remove task " + taskId1);
+//        taskManager.removeTask(taskId1);
+//        System.out.println("------------------");
+//        printAllTasks(taskManager);
+//        printHistory(taskManager);
     }
 
     private static void printAllTasks(TaskManager taskManager) {
