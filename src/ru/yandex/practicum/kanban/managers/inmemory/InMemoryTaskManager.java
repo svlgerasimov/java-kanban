@@ -271,4 +271,17 @@ public class InMemoryTaskManager implements TaskManager {
         map.clear();
     }
 
+    //Ищет задачу любого типа по id; если не нашел, возвращает null
+    protected Task getAnyTaskById(int id) {
+        Task task = tasks.get(id);
+        if (task == null) {
+            task = epics.get(id);
+        }
+        if (task == null) {
+            task = subtasks.get(id);
+        }
+        return task;
+    }
+
+
 }

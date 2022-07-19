@@ -15,8 +15,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager taskManager = Managers.getDefault();
-        taskManager = new FileBackedTaskManager(Path.of("resources", "taskManager"));
+        Path filePath = Path.of("resources", "taskManager");
+        TaskManager taskManager = Managers.getFileBacked(filePath);
+
 
         int taskId1 = taskManager.addTask(new Task(0,
                 "Задача 1", "Задача 1", TaskStatus.NEW)).getId();
@@ -60,6 +61,7 @@ public class Main {
         System.out.println("Get task: " + taskManager.getEpic(epicId2));
         System.out.println("------------------");
 
+        printAllTasks(taskManager);
         printHistory(taskManager);
 
 //        System.out.println("Remove subtask " + subtaskId2);
@@ -79,6 +81,12 @@ public class Main {
 //        System.out.println("------------------");
 //        printAllTasks(taskManager);
 //        printHistory(taskManager);
+
+        TaskManager taskManagerCopy = Managers.restoreFileBacked(filePath);
+        System.out.println("------------------");
+        System.out.println("Task manager from file:");
+        printAllTasks(taskManagerCopy);
+        printHistory(taskManagerCopy);
     }
 
     private static void printAllTasks(TaskManager taskManager) {
