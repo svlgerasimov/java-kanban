@@ -1,5 +1,8 @@
-package ru.yandex.practicum.kanban.managers;
+package ru.yandex.practicum.kanban.managers.inmemory;
 
+import ru.yandex.practicum.kanban.managers.HistoryManager;
+import ru.yandex.practicum.kanban.managers.Managers;
+import ru.yandex.practicum.kanban.managers.TaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;

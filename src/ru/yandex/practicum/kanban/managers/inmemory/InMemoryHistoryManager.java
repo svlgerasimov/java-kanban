@@ -1,5 +1,6 @@
-package ru.yandex.practicum.kanban.managers;
+package ru.yandex.practicum.kanban.managers.inmemory;
 
+import ru.yandex.practicum.kanban.managers.HistoryManager;
 import ru.yandex.practicum.kanban.tasks.Task;
 
 import java.util.*;

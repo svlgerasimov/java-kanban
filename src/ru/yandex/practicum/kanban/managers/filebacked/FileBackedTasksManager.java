@@ -1,10 +1,11 @@
-package ru.yandex.practicum.kanban.managers;
+package ru.yandex.practicum.kanban.managers.filebacked;
 
+import ru.yandex.practicum.kanban.managers.inmemory.InMemoryTaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 
-public class FileBackedTasksManager extends InMemoryTaskManager{
+public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void save(){}
 
