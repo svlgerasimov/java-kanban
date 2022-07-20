@@ -17,6 +17,26 @@ public final class CSVUtil {
     private CSVUtil() {
     }
 
+    public static String taskToString(Task task) {
+        if (task == null) {
+            return "";
+        }
+        return task.getId() + DELIMITER +
+                task.getType() + DELIMITER +
+                task.getName() + DELIMITER +
+                task.getStatus() + DELIMITER +
+                task.getDescription() + DELIMITER;
+    }
+
+    // перегрузка метода для Subtask, чтобы не использовать в общем методе ветвление с instanceOf
+    // и не делать сужающее приведение типов на основании getType()
+    public static String taskToString(Subtask subtask) {
+        if (subtask == null) {
+            return "";
+        }
+        return taskToString((Task) subtask) + subtask.getEpicId();
+    }
+
     public static String historyToString(HistoryManager historyManager) {
         StringBuilder stringBuilder = new StringBuilder();
         List<Task> history = historyManager.getHistory();
@@ -71,46 +91,6 @@ public final class CSVUtil {
             } catch (Exception e) {
                 throw new WrongCSVFormatException("CSV format error in line {" + csvLine + "}");
             }
-        }
-
-        public TaskFieldsCSV(Task task) {
-            this.id = task.getId();
-            this.type = TaskType.TASK;
-            this.name = task.getName();
-            this.status = task.getStatus();
-            this.description = task.getDescription();
-            this.epic = null;
-        }
-
-        public TaskFieldsCSV(Epic epic) {
-            this.id = epic.getId();
-            this.type = TaskType.EPIC;
-            this.name = epic.getName();
-            this.status = epic.getStatus();
-            this.description = epic.getDescription();
-            this.epic = null;
-        }
-
-        public TaskFieldsCSV(Subtask subtask) {
-            this.id = subtask.getId();
-            this.type = TaskType.SUBTASK;
-            this.name = subtask.getName();
-            this.status = subtask.getStatus();
-            this.description = subtask.getDescription();
-            this.epic = subtask.getEpicId();
-        }
-
-        @Override
-        public String toString() {
-            String result = id + DELIMITER +
-                    type + DELIMITER +
-                    name + DELIMITER +
-                    status + DELIMITER +
-                    description + DELIMITER;
-            if (TaskType.SUBTASK.equals(type)) {
-                result += epic;
-            }
-            return result;
         }
 
         public int getId() {

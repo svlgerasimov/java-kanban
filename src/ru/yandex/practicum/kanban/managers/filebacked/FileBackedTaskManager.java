@@ -21,19 +21,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.path = path;
     }
 
-    private void save() throws ManagerSaveException {
+    private void save() {
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)) {
             bufferedWriter.write(CSVUtil.FILE_HEADER + "\n");
             for (Task task : tasks.values()) {
-                bufferedWriter.write(new TaskFieldsCSV(task) + "\n");
+                bufferedWriter.write(CSVUtil.taskToString(task) + "\n");
             }
             // Сначала сохраняем эпики, потом подзадачи.
             // Иначе при восстановлении подзадачи без эпиков не добавятся
             for (Epic epic : epics.values()) {
-                bufferedWriter.write(new TaskFieldsCSV(epic) + "\n");
+                bufferedWriter.write(CSVUtil.taskToString(epic) + "\n");
             }
             for (Subtask subtask : subtasks.values()) {
-                bufferedWriter.write(new TaskFieldsCSV(subtask) + "\n");
+                bufferedWriter.write(CSVUtil.taskToString(subtask) + "\n");
             }
             bufferedWriter.write(String.format("%n%s", CSVUtil.historyToString(historyManager)));
         } catch (IOException e) {
@@ -53,10 +53,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 taskManager.addTaskFromString(taskLine);
             }
             String historyLine = bufferedReader.readLine();
-            for (Integer taskId : CSVUtil.historyIdsFromString(historyLine)) {
-                Task task = taskManager.getAnyTaskById(taskId);
-                if (task != null) {
-                    taskManager.historyManager.add(task);
+            if (historyLine != null) {
+                for (Integer taskId : CSVUtil.historyIdsFromString(historyLine)) {
+                    Task task = taskManager.getAnyTaskById(taskId);
+                    if (task != null) {
+                        taskManager.historyManager.add(task);
+                    }
                 }
             }
         } catch (IOException e) {

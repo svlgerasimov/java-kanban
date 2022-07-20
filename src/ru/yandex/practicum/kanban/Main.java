@@ -83,6 +83,9 @@ public class Main {
 
 //        filePath = Path.of("resources", "taskManager_.csv");
 //        filePath = Path.of("resources", "taskManager1.csv");
+//        filePath = Path.of("resources", "taskManager2.csv");
+//        taskManager.clearTasks();
+//        taskManager.clearEpics();
         TaskManager taskManagerCopy = Managers.restoreFileBacked(filePath);
         System.out.println("------------------");
         System.out.println("Task manager from file:");
