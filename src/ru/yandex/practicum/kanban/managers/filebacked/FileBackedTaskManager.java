@@ -23,6 +23,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void save() throws ManagerSaveException {
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)) {
+            bufferedWriter.write(CSVUtil.FILE_HEADER + "\n");
             for (Task task : tasks.values()) {
                 bufferedWriter.write(new TaskFieldsCSV(task) + "\n");
             }
@@ -43,6 +44,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static FileBackedTaskManager loadFromFile(Path path) {
         FileBackedTaskManager taskManager = new FileBackedTaskManager(path);
         try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
+            bufferedReader.readLine();  // Считываем и игнорируем заголовок
             while (bufferedReader.ready()) {
                 String taskLine = bufferedReader.readLine();
                 if (taskLine.isEmpty()) {

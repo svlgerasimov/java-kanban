@@ -9,6 +9,10 @@ import java.util.List;
 public final class CSVUtil {
 
     private final static String DELIMITER = ",";
+    public final static String FILE_HEADER = "id" + DELIMITER +
+            "type" + DELIMITER + "name" + DELIMITER +
+            "status" + DELIMITER + "description" + DELIMITER +
+            "epic";
 
     private CSVUtil() {
     }
