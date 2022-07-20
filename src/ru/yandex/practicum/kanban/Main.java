@@ -2,7 +2,6 @@ package ru.yandex.practicum.kanban;
 
 import ru.yandex.practicum.kanban.managers.Managers;
 import ru.yandex.practicum.kanban.managers.TaskManager;
-import ru.yandex.practicum.kanban.managers.filebacked.FileBackedTaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
@@ -15,7 +14,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Path filePath = Path.of("resources", "taskManager");
+        Path filePath = Path.of("resources", "taskManager.csv");
         TaskManager taskManager = Managers.getFileBacked(filePath);
 
 
@@ -82,6 +81,8 @@ public class Main {
 //        printAllTasks(taskManager);
 //        printHistory(taskManager);
 
+//        filePath = Path.of("resources", "taskManager_.csv");
+//        filePath = Path.of("resources", "taskManager1.csv");
         TaskManager taskManagerCopy = Managers.restoreFileBacked(filePath);
         System.out.println("------------------");
         System.out.println("Task manager from file:");

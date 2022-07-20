@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 
-
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private final Path path;
@@ -22,8 +21,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.path = path;
     }
 
-    private void save(){
-        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)){
+    private void save() throws ManagerSaveException {
+        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)) {
             for (Task task : tasks.values()) {
                 bufferedWriter.write(new TaskFieldsCSV(task) + "\n");
             }
@@ -37,13 +36,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
             bufferedWriter.write(String.format("%n%s", CSVUtil.historyToString(historyManager)));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ManagerSaveException("Manager save to file error: " + e.getMessage());
         }
     }
 
     public static FileBackedTaskManager loadFromFile(Path path) {
         FileBackedTaskManager taskManager = new FileBackedTaskManager(path);
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path)){
+        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
             while (bufferedReader.ready()) {
                 String taskLine = bufferedReader.readLine();
                 if (taskLine.isEmpty()) {
@@ -59,7 +58,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ManagerLoadException("Manager load from file exception: " + e.getMessage());
         }
         return taskManager;
     }
@@ -89,7 +88,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 break;
         }
     }
-
 
 
     @Override

@@ -44,13 +44,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public void clearHistory() {
-        nodesById.clear();
-        head = null;
-        tail = null;
-    }
-
-    @Override
     public void update(Task task) {
         if (task == null) {
             return;

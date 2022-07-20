@@ -10,12 +10,13 @@ public final class CSVUtil {
 
     private final static String DELIMITER = ",";
 
-    private CSVUtil() {}
+    private CSVUtil() {
+    }
 
     public static String historyToString(HistoryManager historyManager) {
         StringBuilder stringBuilder = new StringBuilder();
         for (Task task : historyManager.getHistory()) {
-            stringBuilder.append(task.getId() + DELIMITER);
+            stringBuilder.append(task.getId()).append(DELIMITER);
         }
         return stringBuilder.toString();
     }
@@ -32,10 +33,8 @@ public final class CSVUtil {
         return result;
     }
 
-
+    //Класс для конвертации строк CSV файла в поля классов задач и обратно
     public static class TaskFieldsCSV {
-        //private final static String delimiter = ",";
-
         private final int id;
         private final TaskType type;
         private final String name;
@@ -50,7 +49,11 @@ public final class CSVUtil {
                 type = TaskType.valueOf(words[1]);
                 name = words[2];
                 status = TaskStatus.valueOf(words[3]);
-                description = words[4];
+                if (words.length > 4) {
+                    description = words[4];
+                } else {
+                    description = "";   //если описание задачи пусто, split обрежет этот столбец, т.к. он последний
+                }
                 if (TaskType.SUBTASK.equals(type)) {
                     epic = Integer.valueOf(words[5]);
                 } else {
@@ -79,7 +82,7 @@ public final class CSVUtil {
             this.epic = null;
         }
 
-        public TaskFieldsCSV(Subtask subtask){
+        public TaskFieldsCSV(Subtask subtask) {
             this.id = subtask.getId();
             this.type = TaskType.SUBTASK;
             this.name = subtask.getName();
