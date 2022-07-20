@@ -7,4 +7,4 @@ id,type,name,status,description,epic
 5,SUBTASK,Подзадача 2,IN_PROGRESS,Подзадача 2,2
 6,SUBTASK,Подзадача 3,NEW,Подзадача 3,2
 
-0,2,5,4,1,6,3,
+0,2,5,4,1,6,3

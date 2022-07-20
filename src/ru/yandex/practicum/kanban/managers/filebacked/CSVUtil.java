@@ -19,8 +19,13 @@ public final class CSVUtil {
 
     public static String historyToString(HistoryManager historyManager) {
         StringBuilder stringBuilder = new StringBuilder();
-        for (Task task : historyManager.getHistory()) {
-            stringBuilder.append(task.getId()).append(DELIMITER);
+        List<Task> history = historyManager.getHistory();
+        for (int i = 0; i < history.size(); i++) {
+            Task task = history.get(i);
+            stringBuilder.append(task.getId());
+            if (i < history.size() - 1) {
+                stringBuilder.append(DELIMITER);
+            }
         }
         return stringBuilder.toString();
     }
