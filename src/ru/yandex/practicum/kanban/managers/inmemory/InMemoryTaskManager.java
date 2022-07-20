@@ -69,6 +69,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         int id = task.getId();
         tasks.replace(id, task);
+        historyManager.update(task);
     }
 
     @Override
@@ -134,6 +135,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic != null) {
             updateEpicStatus(epic);
         }
+        historyManager.update(subtask);
     }
 
     @Override
@@ -190,6 +192,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = epic.getId();
         epics.replace(id, epic);
         updateEpicStatus(epic);
+        historyManager.update(epic);
     }
 
     @Override

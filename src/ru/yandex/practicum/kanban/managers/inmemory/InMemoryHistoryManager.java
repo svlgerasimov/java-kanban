@@ -50,6 +50,17 @@ public class InMemoryHistoryManager implements HistoryManager {
         tail = null;
     }
 
+    @Override
+    public void update(Task task) {
+        if (task == null) {
+            return;
+        }
+        Node node = nodesById.get(task.getId());
+        if (node != null) {
+            node.setData(task);
+        }
+    }
+
     //Добавляет узел в конец списка
     private Node linkLast(Task task) {
         Node node = new Node(task);
@@ -87,7 +98,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private static class Node {
         private Node next;
         private Node prev;
-        private final Task data;
+        private Task data;
 
         public Node(Task data) {
             this.data = data;
@@ -95,6 +106,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         public Task getData() {
             return data;
+        }
+
+        public void setData(Task data) {
+            this.data = data;
         }
 
         public Node getNext() {
