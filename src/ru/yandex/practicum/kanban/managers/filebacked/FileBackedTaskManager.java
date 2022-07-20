@@ -89,6 +89,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
                 break;
         }
+        int taskId = taskFieldsCSV.getId();
+        if (taskId >= nextId) {
+            nextId = taskId + 1;
+        }
     }
 
 
