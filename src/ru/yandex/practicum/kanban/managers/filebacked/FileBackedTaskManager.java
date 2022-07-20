@@ -1,38 +1,26 @@
 package ru.yandex.practicum.kanban.managers.filebacked;
 
-import ru.yandex.practicum.kanban.managers.HistoryManager;
 import ru.yandex.practicum.kanban.managers.inmemory.InMemoryTaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
+import ru.yandex.practicum.kanban.managers.filebacked.CSVUtil.TaskFieldsCSV;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+
 
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    private final static String delimiter = ",";
-
-    //private final String filename;
     private final Path path;
 
     public FileBackedTaskManager(Path path) {
-        //this.filename = filename;
         this.path = path;
     }
-
-//    public FileBackedTasksManager(String filename, boolean loadFromFile) {
-//        this(filename);
-//        if (loadFromFile) {
-//
-//        }
-//    }
 
     private void save(){
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)){
@@ -47,25 +35,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             for (Subtask subtask : subtasks.values()) {
                 bufferedWriter.write(new TaskFieldsCSV(subtask) + "\n");
             }
-            bufferedWriter.write(String.format("%n%s", historyToString(historyManager)));
+            bufferedWriter.write(String.format("%n%s", CSVUtil.historyToString(historyManager)));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-//        try (FileWriter fileWriter = new FileWriter(filename)) {
-//            for (Task task : super.tasks.values()) {
-//                fileWriter.write(new TaskFieldsCSV(task) + "\n");
-//            }
-//            for (Epic epic : super.epics.values()) {
-//                fileWriter.write(new TaskFieldsCSV(epic) + "\n");
-//            }
-//            for (Subtask subtask : super.subtasks.values()) {
-//                fileWriter.write(new TaskFieldsCSV(subtask) + "\n");
-//            }
-//            fileWriter.write(String.format("%n%n%s", historyToString(historyManager)));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public static FileBackedTaskManager loadFromFile(Path path) {
@@ -79,17 +52,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 taskManager.addTaskFromString(taskLine);
             }
             String historyLine = bufferedReader.readLine();
-            for (Integer taskId : historyIdsFromString(historyLine)) {
+            for (Integer taskId : CSVUtil.historyIdsFromString(historyLine)) {
                 Task task = taskManager.getAnyTaskById(taskId);
                 if (task != null) {
                     taskManager.historyManager.add(task);
                 }
             }
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         return taskManager;
     }
 
@@ -119,25 +90,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private static String historyToString(HistoryManager historyManager) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Task task : historyManager.getHistory()) {
-            stringBuilder.append(task.getId() + delimiter);
-        }
-        return stringBuilder.toString();
-    }
 
-    private static List<Integer> historyIdsFromString(String line) {
-        List<Integer> result = new ArrayList<>();
-        try {
-            for (String word : line.split(delimiter)) {
-                result.add(Integer.valueOf(word));
-            }
-        } catch (NumberFormatException e) {
-            throw new WrongCSVFormatException("CSV format error in line {" + line + "} (history)");
-        }
-        return result;
-    }
 
     @Override
     public void clearTasks() {
