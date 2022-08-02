@@ -8,10 +8,7 @@ import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> tasks;
@@ -184,15 +181,28 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //обновляет эпик, если эпик с таким id есть
+    //если передаётся эпик с неправильными подзадачами, заменяет на правильные
     @Override
     public void updateEpic(Epic epic) {
         if (epic == null) {
             return;
         }
         int id = epic.getId();
-        epics.replace(id, epic);
-        updateEpicStatus(epic);
-        historyManager.update(epic);
+        Epic previous = epics.replace(id, epic);
+        if (previous != null) {
+            List<Integer> previousSubtaskIds = previous.getSubtaskIds();
+            // если у нового эпика другой список подзадач, подменяем на правильный;
+            // если не сравнивать, то всё сломается:
+            // если передать тот же объект - список очистится, и подзадачи потеряются
+            if (!Objects.equals(previousSubtaskIds, epic.getSubtaskIds())) {
+                epic.clearSubtasks();
+                for (Integer subtaskId : previousSubtaskIds) {
+                    epic.addSubtask(subtaskId);
+                }
+            }
+            updateEpicStatus(epic);
+            historyManager.update(epic);
+        }
     }
 
     @Override
