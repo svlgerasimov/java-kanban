@@ -4,7 +4,6 @@ import ru.yandex.practicum.kanban.managers.inmemory.InMemoryTaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
-import ru.yandex.practicum.kanban.managers.filebacked.CSVUtil.TaskFieldsCSV;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -69,20 +68,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     //здесь нельзя использовать родительские addTask и т.д., т.к. они подменяют id
     private void addTaskFromString(String line) {
-        TaskFieldsCSV taskFieldsCSV = new TaskFieldsCSV(line);
-        switch (taskFieldsCSV.getType()) {
+        Task task = CSVUtil.taskFromString(line);
+        switch (task.getType()) {
             case TASK:
-                Task task = new Task(taskFieldsCSV.getId(), taskFieldsCSV.getName(),
-                        taskFieldsCSV.getDescription(), taskFieldsCSV.getStatus());
                 tasks.put(task.getId(), task);
                 break;
             case EPIC:
-                Epic epic = new Epic(taskFieldsCSV.getId(), taskFieldsCSV.getName(), taskFieldsCSV.getDescription());
-                epics.put(epic.getId(), epic);
+                epics.put(task.getId(), (Epic) task);
                 break;
             case SUBTASK:
-                Subtask subtask = new Subtask(taskFieldsCSV.getId(), taskFieldsCSV.getName(),
-                        taskFieldsCSV.getDescription(), taskFieldsCSV.getStatus(), taskFieldsCSV.getEpic());
+                Subtask subtask = (Subtask) task;
                 Epic parentEpic = epics.get(subtask.getEpicId());
                 if (parentEpic != null) {
                     subtasks.put(subtask.getId(), subtask);
@@ -91,10 +86,37 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
                 break;
         }
-        int taskId = taskFieldsCSV.getId();
+        int taskId = task.getId();
         if (taskId >= nextId) {
             nextId = taskId + 1;
         }
+
+//        TaskFieldsCSV taskFieldsCSV = new TaskFieldsCSV(line);
+//        switch (taskFieldsCSV.getType()) {
+//            case TASK:
+//                Task task = new Task(taskFieldsCSV.getId(), taskFieldsCSV.getName(),
+//                        taskFieldsCSV.getDescription(), taskFieldsCSV.getStatus());
+//                tasks.put(task.getId(), task);
+//                break;
+//            case EPIC:
+//                Epic epic = new Epic(taskFieldsCSV.getId(), taskFieldsCSV.getName(), taskFieldsCSV.getDescription());
+//                epics.put(epic.getId(), epic);
+//                break;
+//            case SUBTASK:
+//                Subtask subtask = new Subtask(taskFieldsCSV.getId(), taskFieldsCSV.getName(),
+//                        taskFieldsCSV.getDescription(), taskFieldsCSV.getStatus(), taskFieldsCSV.getEpic());
+//                Epic parentEpic = epics.get(subtask.getEpicId());
+//                if (parentEpic != null) {
+//                    subtasks.put(subtask.getId(), subtask);
+//                    parentEpic.addSubtask(subtask.getId());
+//                    updateEpicStatus(parentEpic);
+//                }
+//                break;
+//        }
+//        int taskId = taskFieldsCSV.getId();
+//        if (taskId >= nextId) {
+//            nextId = taskId + 1;
+//        }
     }
 
 
