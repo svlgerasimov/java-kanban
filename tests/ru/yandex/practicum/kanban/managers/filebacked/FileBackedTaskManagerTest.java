@@ -10,6 +10,7 @@ import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,6 +38,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     public void loadManagerFilled() {
         Task task = taskManager.addTask(
                 new Task(0, "task name", "task description", TaskStatus.DONE));
+        task.setStartTime(LocalDateTime.now());
+        task.setDuration(10);
         int taskId = task.getId();
         Epic epic1 = taskManager.addEpic(new Epic(0, "epic name 1", "epic with subtasks"));
         int epicId1 = epic1.getId();

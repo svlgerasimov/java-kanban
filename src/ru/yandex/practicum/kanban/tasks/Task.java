@@ -1,13 +1,16 @@
 package ru.yandex.practicum.kanban.tasks;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
 
-    private String name;
-    private String description;
+    private final String name;
+    private final String description;
     private int id;
     private TaskStatus status;
+    private LocalDateTime startTime;
+    private int duration;   // продолжительность в минутах
 
     public Task(int id, String name, String description, TaskStatus status) {
         this.name = name;
@@ -44,13 +47,36 @@ public class Task {
         return TaskType.TASK;
     }
 
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        // Раз уж длительность в минутах, можно и время начала округлить до минут
+        this.startTime = (startTime == null) ? null : startTime.withSecond(0).withNano(0);
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getEndTime() {
+        return (startTime == null) ? null : startTime.plusMinutes(duration);
+    }
+
     @Override
     public String toString() {
         return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", id=" + id +
                 ", status=" + status +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
                 '}';
     }
 
@@ -59,12 +85,13 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && Objects.equals(name, task.name) && Objects.equals(description, task.description)
-                && status == task.status;
+        return id == task.id && duration == task.duration && Objects.equals(name, task.name)
+                && Objects.equals(description, task.description) && status == task.status
+                && Objects.equals(startTime, task.startTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, id, status);
+        return Objects.hash(name, description, id, status, startTime, duration);
     }
 }
