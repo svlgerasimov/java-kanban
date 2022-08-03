@@ -192,7 +192,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (previous != null) {
             List<Integer> previousSubtaskIds = previous.getSubtaskIds();
             // если у нового эпика другой список подзадач, подменяем на правильный;
-            // если не сравнивать, то всё сломается:
+            // сравнивать нужно, иначе всё сломается:
             // если передать тот же объект - список очистится, и подзадачи потеряются
             if (!Objects.equals(previousSubtaskIds, epic.getSubtaskIds())) {
                 epic.clearSubtasks();
