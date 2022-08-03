@@ -51,6 +51,8 @@ public class Main {
         System.out.println("Get task: " + subtask);
         taskManager.updateSubtask(new Subtask(subtask.getId(), subtask.getName(), subtask.getDescription(),
                 TaskStatus.IN_PROGRESS, subtask.getEpicId()));
+        Epic epic = taskManager.getEpic(epicId1);
+        taskManager.updateEpic(new Epic(epic.getId(), epic.getName() + " updated", epic.getDescription()));
         System.out.println("------------------");
 
         printHistory(taskManager);
