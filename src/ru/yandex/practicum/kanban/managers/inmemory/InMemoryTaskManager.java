@@ -3,6 +3,7 @@ package ru.yandex.practicum.kanban.managers.inmemory;
 import ru.yandex.practicum.kanban.managers.HistoryManager;
 import ru.yandex.practicum.kanban.managers.Managers;
 import ru.yandex.practicum.kanban.managers.TaskManager;
+import ru.yandex.practicum.kanban.managers.TimeManager;
 import ru.yandex.practicum.kanban.tasks.*;
 
 import java.time.Duration;
@@ -15,7 +16,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Epic> epics;
     protected final Map<Integer, Subtask> subtasks;
     protected final HistoryManager historyManager;
-    protected final TreeSet<Task> prioritizedTasks;
+    protected final TimeManager timeManager;
     protected int nextId;
 
     public InMemoryTaskManager() {
@@ -23,18 +24,7 @@ public class InMemoryTaskManager implements TaskManager {
         epics = new HashMap<>();
         subtasks = new HashMap<>();
         historyManager = Managers.getDefaultHistory();
-        prioritizedTasks = new TreeSet<>((task1, task2) -> {
-            LocalDateTime startTime1 = task1.getStartTime();
-            LocalDateTime startTime2 = task2.getStartTime();
-            if (startTime1 == null) {
-                return 1;
-            }
-            if (startTime2 == null) {
-                return -1;
-            }
-            return startTime1.compareTo(startTime2);    // с одинаковым временем добавится только 1 задача
-                                                        // но так как есть проверка на пересечение, ничего страшного
-        });
+        timeManager = new TimeManager();
     }
 
     private int generateNextId() {
@@ -49,9 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void clearTasks() {
         for (Task task : tasks.values()) {
-            if (task != null) {
-                prioritizedTasks.remove(task);
-            }
+            timeManager.removeTask(task);
         }
         clearTasksFromMap(tasks);
     }
@@ -73,7 +61,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = generateNextId();
         task.setId(id);
         tasks.put(id, task);
-        prioritizedTasks.add(task);
+        timeManager.addTask(task);
         return task;
     }
 
@@ -86,18 +74,13 @@ public class InMemoryTaskManager implements TaskManager {
         int id = task.getId();
         Task previous = tasks.replace(id, task);
         historyManager.update(task);
-        if (previous != null) {
-            prioritizedTasks.remove(previous);
-            prioritizedTasks.add(task);
-        }
+        timeManager.updateTask(previous, task);
     }
 
     @Override
     public void removeTask(int id) {
         Task removed = removeTaskFromMap(tasks, id);
-        if (removed != null) {
-            prioritizedTasks.remove(removed);
-        }
+        timeManager.removeTask(removed);
     }
 
     @Override
@@ -112,9 +95,7 @@ public class InMemoryTaskManager implements TaskManager {
             updateEpicFromSubtasks(epic);
         }
         for (Subtask subtask : subtasks.values()) {
-            if (subtask != null) {
-                prioritizedTasks.remove(subtask);
-            }
+            timeManager.removeTask(subtask);
         }
         clearTasksFromMap(subtasks);
     }
@@ -143,7 +124,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.put(id, subtask);
         epic.addSubtask(id);
         updateEpicFromSubtasks(epic);
-        prioritizedTasks.add(subtask);
+        timeManager.addTask(subtask);
         return subtask;
     }
 
@@ -165,8 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
             updateEpicFromSubtasks(epic);
         }
         historyManager.update(subtask);
-        prioritizedTasks.remove(previous);
-        prioritizedTasks.add(subtask);
+        timeManager.updateTask(previous, subtask);
     }
 
     @Override
@@ -181,7 +161,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.removeSubtask(id);
             updateEpicFromSubtasks(epic);
         }
-        prioritizedTasks.remove(subtask);
+        timeManager.removeTask(subtask);
     }
 
     @Override
@@ -366,7 +346,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getPrioritizedTasks() {
-        return new ArrayList<>(prioritizedTasks);
+        return timeManager.getPrioritizedTasks();
     }
 
     private <V extends Task> V removeTaskFromMap(Map<Integer, V> map, int id) {
@@ -392,6 +372,4 @@ public class InMemoryTaskManager implements TaskManager {
         }
         return task;
     }
-
-
 }

@@ -18,8 +18,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     // Тесты addTask()
 
-    //Так как add меняет id, то может быть реализация, в которой equals будет false,
-    //поэтому сравнение по не изменяющимся полям
+    // Так как add меняет id, то может быть реализация, в которой equals будет false
+    // (например возвращается копия, дополненная правильным id),
+    // поэтому сравнение по неизменяющимся полям
     @Test
     public void addNewTaskTest() {
         Task task = new Task(0, "name", "description", TaskStatus.NEW);

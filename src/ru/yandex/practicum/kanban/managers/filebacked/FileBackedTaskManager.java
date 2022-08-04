@@ -72,7 +72,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         switch (task.getType()) {
             case TASK:
                 tasks.put(task.getId(), task);
-                prioritizedTasks.add(task);
+                timeManager.addTask(task);
                 break;
             case EPIC:
                 epics.put(task.getId(), (Epic) task);
@@ -85,7 +85,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     parentEpic.addSubtask(subtask.getId());
                     updateEpicFromSubtasks(parentEpic);
                 }
-                prioritizedTasks.add(subtask);
+                timeManager.addTask(task);
                 break;
         }
         int taskId = task.getId();
