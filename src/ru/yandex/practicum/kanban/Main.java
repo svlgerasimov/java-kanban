@@ -37,6 +37,7 @@ public class Main {
         int subtaskId3 = taskManager.addSubtask(new Subtask(0,
                 "Подзадача 3", "Подзадача 3", TaskStatus.NEW, epicId1,
                 minStartTime.plusMinutes(60), 30)).getId();
+        taskManager.addTask(new Task(0, "", "", TaskStatus.NEW, minStartTime, 20));
 
         printAllTasks(taskManager);
         printHistory(taskManager);
@@ -69,6 +70,7 @@ public class Main {
 
         printAllTasks(taskManager);
         printHistory(taskManager);
+        printPrioritizedTasks(taskManager);
 
 //        System.out.println("Remove subtask " + subtaskId2);
 //        taskManager.removeSubtask(subtaskId2);
@@ -98,6 +100,7 @@ public class Main {
         System.out.println("Task manager from file:");
         printAllTasks(taskManagerCopy);
         printHistory(taskManagerCopy);
+        printPrioritizedTasks(taskManagerCopy);
     }
 
     private static void printAllTasks(TaskManager taskManager) {
@@ -125,6 +128,15 @@ public class Main {
         List<Task> history = taskManager.getHistory();
         for (int i = 0; i < history.size(); i++) {
             System.out.println(i + ". " + history.get(i));
+        }
+        System.out.println("------------------");
+    }
+
+    private static void printPrioritizedTasks(TaskManager taskManager) {
+        System.out.println("Задачи в порядке приоритета");
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        for (int i = 0; i < prioritizedTasks.size(); i++) {
+            System.out.println(i + ". " + prioritizedTasks.get(i));
         }
         System.out.println("------------------");
     }
