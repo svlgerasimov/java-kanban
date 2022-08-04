@@ -1,5 +1,6 @@
 package ru.yandex.practicum.kanban.tasks;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task {
@@ -7,6 +8,12 @@ public class Subtask extends Task {
 
     public Subtask(int id, String name, String description, TaskStatus status, int epicId) {
         super(id, name, description, status);
+        this.epicId = epicId;
+    }
+
+    public Subtask(int id, String name, String description, TaskStatus status, int epicId,
+                   LocalDateTime startTime, int duration) {
+        super(id, name, description, status, startTime, duration);
         this.epicId = epicId;
     }
 

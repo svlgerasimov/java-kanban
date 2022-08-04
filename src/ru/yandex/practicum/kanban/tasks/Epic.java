@@ -7,7 +7,8 @@ import java.util.Objects;
 public class Epic extends Task {
     private final List<Integer> subtaskIds;
 
-    //в конструкторе нет статуса, т.к. он рассчитывается на основе подзадач
+    // в конструкторе нет статуса, т.к. он рассчитывается на основе подзадач,
+    // конструктора с временем тоже нет, по той же причине
     public Epic(int id, String name, String description) {
         super(id, name, description, TaskStatus.NEW);
         subtaskIds = new ArrayList<>();

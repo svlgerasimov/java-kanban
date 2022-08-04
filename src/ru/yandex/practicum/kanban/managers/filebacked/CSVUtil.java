@@ -3,15 +3,19 @@ package ru.yandex.practicum.kanban.managers.filebacked;
 import ru.yandex.practicum.kanban.managers.HistoryManager;
 import ru.yandex.practicum.kanban.tasks.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class CSVUtil {
 
     private final static String DELIMITER = ",";
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     public final static String FILE_HEADER = "id" + DELIMITER +
             "type" + DELIMITER + "name" + DELIMITER +
             "status" + DELIMITER + "description" + DELIMITER +
+            "start time" + DELIMITER + "duration" + DELIMITER +
             "epic";
 
     private CSVUtil() {
@@ -21,11 +25,15 @@ public final class CSVUtil {
         if (task == null) {
             return "";
         }
+        LocalDateTime startTime = task.getStartTime();
+        String formattedStartTime = startTime == null ? "" : startTime.format(FORMATTER);
         return task.getId() + DELIMITER +
                 task.getType() + DELIMITER +
                 task.getName() + DELIMITER +
                 task.getStatus() + DELIMITER +
-                task.getDescription() + DELIMITER;
+                task.getDescription() + DELIMITER +
+                formattedStartTime + DELIMITER +
+                task.getDuration() + DELIMITER;
     }
 
     // перегрузка метода для Subtask, чтобы не использовать в общем методе ветвление с instanceOf
@@ -44,18 +52,22 @@ public final class CSVUtil {
             final TaskType type = TaskType.valueOf(words[1]);
             final String name = words[2];
             final TaskStatus status = TaskStatus.valueOf(words[3]);
-            final String description;
-            if (words.length > 4) {
-                description = words[4];
-            } else {
-                description = "";   //если описание задачи пусто, split обрежет этот столбец, т.к. он последний
-            }
+            final String description = words[4];
+            final String formattedDateTime = words[5];
+            final LocalDateTime startTime =
+                    formattedDateTime.isEmpty() ? null : LocalDateTime.parse(formattedDateTime, FORMATTER);
+            final int duration = Integer.parseInt(words[6]);
+//            if (words.length > 4) {
+//                description = words[4];
+//            } else {
+//                description = "";   //если описание задачи пусто, split обрежет этот столбец, т.к. он последний
+//            }
             switch (type) {
                 case TASK:
-                    return new Task(id,name, description, status);
+                    return new Task(id,name, description, status, startTime, duration);
                 case SUBTASK:
-                    final int epic = Integer.parseInt(words[5]);
-                    return new Subtask(id, name, description, status, epic);
+                    final int epic = Integer.parseInt(words[7]);
+                    return new Subtask(id, name, description, status, epic, startTime, duration);
                 case EPIC:
                     return new Epic(id, name, description);
             }

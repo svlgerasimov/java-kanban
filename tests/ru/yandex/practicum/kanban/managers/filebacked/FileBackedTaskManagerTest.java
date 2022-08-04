@@ -35,11 +35,10 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     }
 
     @Test
-    public void loadManagerFilled() {
+    public void loadManagerFilledTest() {
         Task task = taskManager.addTask(
-                new Task(0, "task name", "task description", TaskStatus.DONE));
-        task.setStartTime(LocalDateTime.now());
-        task.setDuration(10);
+                new Task(0, "task name", "task description", TaskStatus.DONE,
+                        LocalDateTime.now(), 10));
         int taskId = task.getId();
         Epic epic1 = taskManager.addEpic(new Epic(0, "epic name 1", "epic with subtasks"));
         int epicId1 = epic1.getId();
@@ -47,7 +46,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
                 new Epic(0, "epic name 2", "epic without subtasks"));
         int epicId2 = epic2.getId();
         Subtask subtask1 = taskManager.addSubtask(
-                new Subtask(0, "subtask name 1", "subtask description 1", TaskStatus.NEW, epicId1));
+                new Subtask(0, "subtask name 1", "subtask description 1", TaskStatus.NEW, epicId1,
+                        LocalDateTime.now(), 5));
         int subtaskId1 = subtask1.getId();
         Subtask subtask2 = taskManager.addSubtask(
                 new Subtask(0, "subtask name 2", "subtask description 2", TaskStatus.DONE, epicId1));
@@ -72,5 +72,20 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         assertEquals(epic2, restored.getEpic(epicId2), "Неверно восстановлены задачи");
         assertEquals(subtask1, restored.getSubtask(subtaskId1), "Неверно восстановлены задачи");
         assertEquals(subtask2, restored.getSubtask(subtaskId2), "Неверно восстановлены задачи");
+    }
+
+    @Test
+    public void loadTasksWithBlankFieldsTest() {
+        Task task = taskManager.addTask(new Task(0, "", "", TaskStatus.NEW));
+        final int taskId = task.getId();
+        Epic epic = taskManager.addEpic(new Epic(0,"", ""));
+        final int epicId = epic.getId();
+        Subtask subtask = taskManager.addSubtask(new Subtask(0, "", "", TaskStatus.NEW, epicId));
+        final int subtaskId = subtask.getId();
+
+        TaskManager restored = FileBackedTaskManager.loadFromFile(filePath);
+        assertEquals(task, restored.getTask(taskId), "Неверно восстановлена задача");
+        assertEquals(subtask, restored.getSubtask(subtaskId), "Неверно восстановлена подзадача");
+        assertEquals(epic, restored.getEpic(epicId), "Неверно восстановлен эпик");
     }
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.kanban.tasks;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Task {
@@ -9,14 +10,21 @@ public class Task {
     private final String description;
     private int id;
     private TaskStatus status;
-    private LocalDateTime startTime;
-    private int duration;   // продолжительность в минутах
+    protected LocalDateTime startTime;
+    protected int duration;   // продолжительность в минутах
 
     public Task(int id, String name, String description, TaskStatus status) {
         this.name = name;
         this.description = description;
         this.id = id;
         this.status = status;
+    }
+
+    public Task(int id, String name, String description, TaskStatus status, LocalDateTime startTime, int duration) {
+        this(id, name, description, status);
+        // Раз уж длительность в минутах, можно и время начала округлить до минут
+        this.startTime = (startTime == null) ? null : startTime.withSecond(0).withNano(0);
+        this.duration = duration;
     }
 
     public String getName() {
@@ -52,8 +60,7 @@ public class Task {
     }
 
     public void setStartTime(LocalDateTime startTime) {
-        // Раз уж длительность в минутах, можно и время начала округлить до минут
-        this.startTime = (startTime == null) ? null : startTime.withSecond(0).withNano(0);
+        this.startTime = startTime;
     }
 
     public int getDuration() {
@@ -75,7 +82,8 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", id=" + id +
                 ", status=" + status +
-                ", startTime=" + startTime +
+                ", startTime=" +
+                (startTime == null ? null : startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))) +
                 ", duration=" + duration +
                 '}';
     }

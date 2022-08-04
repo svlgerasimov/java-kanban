@@ -8,6 +8,7 @@ import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Main {
@@ -18,8 +19,10 @@ public class Main {
         TaskManager taskManager = Managers.getFileBacked(filePath);
 
 
+        LocalDateTime minStartTime = LocalDateTime.now();
+
         int taskId1 = taskManager.addTask(new Task(0,
-                "Задача 1", "Задача 1", TaskStatus.NEW)).getId();
+                "Задача 1", "Задача 1", TaskStatus.NEW, minStartTime, 10)).getId();
         int taskId2 = taskManager.addTask(new Task(0,
                 "Задача 2", "Задача 2", TaskStatus.DONE)).getId();
         int epicId1 = taskManager.addEpic(new Epic(0,
@@ -29,9 +32,11 @@ public class Main {
         int subtaskId1 = taskManager.addSubtask(new Subtask(0,
                 "Подзадача 1", "Подзадача 1", TaskStatus.NEW, epicId1)).getId();
         int subtaskId2 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 2", "Подзадача 2", TaskStatus.NEW, epicId1)).getId();
+                "Подзадача 2", "Подзадача 2", TaskStatus.NEW, epicId1,
+                minStartTime.plusMinutes(20), 20)).getId();
         int subtaskId3 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 3", "Подзадача 3", TaskStatus.NEW, epicId1)).getId();
+                "Подзадача 3", "Подзадача 3", TaskStatus.NEW, epicId1,
+                minStartTime.plusMinutes(60), 30)).getId();
 
         printAllTasks(taskManager);
         printHistory(taskManager);
@@ -46,7 +51,7 @@ public class Main {
         Subtask subtask = taskManager.getSubtask(subtaskId2);
         System.out.println("Get task: " + subtask);
         taskManager.updateSubtask(new Subtask(subtask.getId(), subtask.getName(), subtask.getDescription(),
-                TaskStatus.IN_PROGRESS, subtask.getEpicId()));
+                TaskStatus.IN_PROGRESS, subtask.getEpicId(), minStartTime.plusMinutes(25), 25));
         subtask = taskManager.getSubtask(subtaskId1);
         System.out.println("Get task: " + subtask);
         taskManager.updateSubtask(new Subtask(subtask.getId(), subtask.getName(), subtask.getDescription(),

@@ -3,12 +3,12 @@ package ru.yandex.practicum.kanban.managers.inmemory;
 import ru.yandex.practicum.kanban.managers.HistoryManager;
 import ru.yandex.practicum.kanban.managers.Managers;
 import ru.yandex.practicum.kanban.managers.TaskManager;
-import ru.yandex.practicum.kanban.tasks.Epic;
-import ru.yandex.practicum.kanban.tasks.Subtask;
-import ru.yandex.practicum.kanban.tasks.Task;
-import ru.yandex.practicum.kanban.tasks.TaskStatus;
+import ru.yandex.practicum.kanban.tasks.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> tasks;
@@ -83,7 +83,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void clearSubtasks() {
         for (Epic epic : epics.values()) {
             epic.clearSubtasks();
-            updateEpicStatus(epic);
+            updateEpicFromSubtasks(epic);
         }
         clearTasksFromMap(subtasks);
     }
@@ -111,7 +111,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setId(id);
         subtasks.put(id, subtask);
         epic.addSubtask(id);
-        updateEpicStatus(epic);
+        updateEpicFromSubtasks(epic);
         return subtask;
     }
 
@@ -130,7 +130,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.put(id, subtask);
         Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {
-            updateEpicStatus(epic);
+            updateEpicFromSubtasks(epic);
         }
         historyManager.update(subtask);
     }
@@ -145,7 +145,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epics.get(epicId);
         if (epic != null) {
             epic.removeSubtask(id);
-            updateEpicStatus(epic);
+            updateEpicFromSubtasks(epic);
         }
     }
 
@@ -176,7 +176,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = generateNextId();
         epic.setId(id);
         epics.put(id, epic);
-        updateEpicStatus(epic);
+        updateEpicFromSubtasks(epic);
         return epic;
     }
 
@@ -200,7 +200,7 @@ public class InMemoryTaskManager implements TaskManager {
                     epic.addSubtask(subtaskId);
                 }
             }
-            updateEpicStatus(epic);
+            updateEpicFromSubtasks(epic);
             historyManager.update(epic);
         }
     }
@@ -232,39 +232,96 @@ public class InMemoryTaskManager implements TaskManager {
         return result;
     }
 
-    protected void updateEpicStatus(Epic epic) {
+    protected void updateEpicFromSubtasks(Epic epic) {
+        TaskStatus epicStatus = calculateEpicStatus(epic);
+        if (epicStatus != null) {
+            epic.setStatus(epicStatus);
+        }
+        updateEpicTime(epic);
+    }
+
+    private TaskStatus calculateEpicStatus(Epic epic) {
+        if (epic == null) {
+            return null;
+        }
+        List<TaskStatus> taskStatuses = epic.getSubtaskIds().stream()
+                .map(subtasks::get)
+                .filter(Objects::nonNull)
+                .map(Subtask::getStatus)
+                .collect(Collectors.toList());
+        if (taskStatuses.isEmpty()) {
+            return TaskStatus.NEW;
+        }
+        if (taskStatuses.stream().anyMatch(TaskStatus.IN_PROGRESS::equals)) {
+            return TaskStatus.IN_PROGRESS;
+        }
+        if (taskStatuses.stream().allMatch(TaskStatus.NEW::equals)) {
+            return TaskStatus.NEW;
+        }
+        if (taskStatuses.stream().allMatch(TaskStatus.DONE::equals)) {
+            return TaskStatus.DONE;
+        }
+        return TaskStatus.IN_PROGRESS;
+
+//        int validSubtasks = 0;
+//        int newSubtasks = 0;
+//        int doneSubtasks = 0;
+//
+//        for (Integer subtaskId : epic.getSubtaskIds()) {
+//            Subtask subtask = subtasks.get(subtaskId);
+//            if (subtask == null) {
+//                continue;
+//            }
+//            validSubtasks++;
+//            TaskStatus subtaskStatus = subtask.getStatus();
+//            if (TaskStatus.IN_PROGRESS.equals(subtaskStatus)) {
+//                epic.setStatus(TaskStatus.IN_PROGRESS);
+//                return;
+//            }
+//            if (TaskStatus.NEW.equals(subtaskStatus)) {
+//                newSubtasks++;
+//            } else if (TaskStatus.DONE.equals(subtaskStatus)) {
+//                doneSubtasks++;
+//            }
+//        }
+//
+//        if (validSubtasks == 0 || newSubtasks == validSubtasks) {
+//            epic.setStatus(TaskStatus.NEW);
+//        } else if (doneSubtasks == validSubtasks) {
+//            epic.setStatus(TaskStatus.DONE);
+//        } else {
+//            epic.setStatus(TaskStatus.IN_PROGRESS);
+//        }
+    }
+
+    private void updateEpicTime(Epic epic) {
         if (epic == null) {
             return;
         }
-        int validSubtasks = 0;
-        int newSubtasks = 0;
-        int doneSubtasks = 0;
-
-        for (Integer subtaskId : epic.getSubtaskIds()) {
-            Subtask subtask = subtasks.get(subtaskId);
-            if (subtask == null) {
-                continue;
-            }
-            validSubtasks++;
-            TaskStatus subtaskStatus = subtask.getStatus();
-            if (TaskStatus.IN_PROGRESS.equals(subtaskStatus)) {
-                epic.setStatus(TaskStatus.IN_PROGRESS);
-                return;
-            }
-            if (TaskStatus.NEW.equals(subtaskStatus)) {
-                newSubtasks++;
-            } else if (TaskStatus.DONE.equals(subtaskStatus)) {
-                doneSubtasks++;
-            }
+        List<Subtask> validSubtasks = epic.getSubtaskIds().stream()
+                .map(subtasks::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        Optional<LocalDateTime> startTime = validSubtasks.stream()
+                .map(Subtask::getStartTime)
+                .filter(Objects::nonNull)
+                .min(LocalDateTime::compareTo);
+        if (startTime.isEmpty()) {
+            epic.setStartTime(null);
+            epic.setDuration(0);
+            return;
         }
-
-        if (validSubtasks == 0 || newSubtasks == validSubtasks) {
-            epic.setStatus(TaskStatus.NEW);
-        } else if (doneSubtasks == validSubtasks) {
-            epic.setStatus(TaskStatus.DONE);
-        } else {
-            epic.setStatus(TaskStatus.IN_PROGRESS);
+        Optional<LocalDateTime> endTime = validSubtasks.stream()
+                .map(Subtask::getEndTime)
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo);
+        if (endTime.isEmpty()) {
+            epic.setStartTime(null);
+            epic.setDuration(0);
+            return;
         }
+        epic.setStartTime(startTime.get());
+        epic.setDuration((int) Duration.between(startTime.get(), endTime.get()).toMinutes());
     }
 
     @Override
