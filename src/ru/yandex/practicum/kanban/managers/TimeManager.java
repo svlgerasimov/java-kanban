@@ -32,14 +32,14 @@ public class TimeManager {
         prioritizedTasks.add(task);
     }
 
-    public void updateTask(Task previous, Task task) {
-        if (previous != null) {
-            prioritizedTasks.remove(previous);
-        }
-        if (task != null) {
-            prioritizedTasks.add(task);
-        }
-    }
+//    public void updateTask(Task previous, Task task) {
+//        if (previous != null) {
+//            prioritizedTasks.remove(previous);
+//        }
+//        if (task != null) {
+//            prioritizedTasks.add(task);
+//        }
+//    }
 
     public void removeTask(Task task) {
         if (task == null) {
@@ -50,6 +50,10 @@ public class TimeManager {
 
     public List<Task> getPrioritizedTasks() {
         return new ArrayList<>(prioritizedTasks);
+    }
+
+    public boolean validateTask(Task task) {
+        return true;
     }
 }
 

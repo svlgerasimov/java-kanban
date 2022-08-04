@@ -71,8 +71,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Task task = CSVUtil.taskFromString(line);
         switch (task.getType()) {
             case TASK:
-                tasks.put(task.getId(), task);
-                timeManager.addTask(task);
+                if (timeManager.validateTask(task)) {
+                    tasks.put(task.getId(), task);
+                    timeManager.addTask(task);
+                }
                 break;
             case EPIC:
                 epics.put(task.getId(), (Epic) task);
@@ -80,12 +82,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case SUBTASK:
                 Subtask subtask = (Subtask) task;
                 Epic parentEpic = epics.get(subtask.getEpicId());
-                if (parentEpic != null) {
+                if (parentEpic != null && timeManager.validateTask(subtask)) {
                     subtasks.put(subtask.getId(), subtask);
                     parentEpic.addSubtask(subtask.getId());
                     updateEpicFromSubtasks(parentEpic);
+                    timeManager.addTask(subtask);
                 }
-                timeManager.addTask(task);
                 break;
         }
         int taskId = task.getId();

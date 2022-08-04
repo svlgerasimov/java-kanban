@@ -55,7 +55,7 @@ public class InMemoryTaskManager implements TaskManager {
     //добавляет задачу, назначая ей id
     @Override
     public Task addTask(Task task) {
-        if (task == null) {
+        if (task == null || !timeManager.validateTask(task)) {
             return null;
         }
         int id = generateNextId();
@@ -65,16 +65,28 @@ public class InMemoryTaskManager implements TaskManager {
         return task;
     }
 
-    //обновляет задачу, если задача с таким id есть
+    //обновляет задачу, если задача с таким id есть и если новые временнЫе параметры позволяют
     @Override
     public void updateTask(Task task) {
         if (task == null) {
             return;
         }
         int id = task.getId();
-        Task previous = tasks.replace(id, task);
-        historyManager.update(task);
-        timeManager.updateTask(previous, task);
+        Task previous = tasks.get(id);
+        if (previous == null) {
+            return;     // задачи с таким id не было
+        }
+        // Чтобы проверить, что задача с новым временем подходит,
+        // нужно проверить, что она не пересекается с остальными.
+        // Поэтому придется её убрать, но если она не проходит, вернуть обратно
+        timeManager.removeTask(previous);
+        if (timeManager.validateTask(task)) {
+            tasks.put(id, task);
+            historyManager.update(task);
+            timeManager.addTask(task);
+        } else {
+            timeManager.addTask(previous);
+        }
     }
 
     @Override
@@ -111,7 +123,7 @@ public class InMemoryTaskManager implements TaskManager {
     //добавляет подзадачу, если есть эпик, в который её нужно добавить
     @Override
     public Subtask addSubtask(Subtask subtask) {
-        if (subtask == null) {
+        if (subtask == null || !timeManager.validateTask(subtask)) {
             return null;
         }
         int epicId = subtask.getEpicId();
@@ -140,13 +152,20 @@ public class InMemoryTaskManager implements TaskManager {
             //подзадачи с таким id нет или эпик в новой версии отличается
             return;
         }
-        subtasks.put(id, subtask);
-        Epic epic = epics.get(subtask.getEpicId());
-        if (epic != null) {
-            updateEpicFromSubtasks(epic);
+        timeManager.removeTask(previous);
+        if (timeManager.validateTask(subtask)) {
+            subtasks.put(id, subtask);
+            Epic epic = epics.get(subtask.getEpicId());
+            if (epic != null) {
+                updateEpicFromSubtasks(epic);
+            }
+            historyManager.update(subtask);
+            timeManager.addTask(subtask);
+        } else {
+            timeManager.addTask(previous);
         }
-        historyManager.update(subtask);
-        timeManager.updateTask(previous, subtask);
+
+
     }
 
     @Override
