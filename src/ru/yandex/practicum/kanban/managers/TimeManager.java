@@ -5,6 +5,7 @@ import ru.yandex.practicum.kanban.tasks.Task;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeSet;
 
 public class TimeManager {
@@ -12,16 +13,31 @@ public class TimeManager {
 
     public TimeManager() {
         prioritizedTasks = new TreeSet<>((task1, task2) -> {
+            if (Objects.equals(task1, task2)) {
+                return 0;
+            }
+            if (task1 == null) {
+                return 1;
+            }
+            if (task2 == null) {
+                return -1;
+            }
             LocalDateTime startTime1 = task1.getStartTime();
             LocalDateTime startTime2 = task2.getStartTime();
+            // Если время начала двух задач равно (прежде всего случай startTime = null,
+            // такие задачи имеют право на существование и должны располагаться в конце),
+            // нужно определить заранее ясный порядок. Логично использовать id.
+            // Вторая задача с тем же id не добавится, но таких задач быть не должно
+            if (Objects.equals(startTime1, startTime2)) {
+                return Integer.compare(task1.getId(), task2.getId());
+            }
             if (startTime1 == null) {
                 return 1;
             }
             if (startTime2 == null) {
                 return -1;
             }
-            return startTime1.compareTo(startTime2);    // с одинаковым временем добавится только 1 задача
-            // но так как есть проверка на пересечение, ничего страшного
+            return startTime1.compareTo(startTime2);    // здесь нуля уже не будет
         });
     }
 
