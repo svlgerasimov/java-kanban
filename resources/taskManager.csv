@@ -1,8 +1,4 @@
 id,type,name,status,description,start time,duration,epic
-0,TASK,task name,DONE,task description,04.08.2022 14:51,10,
-1,EPIC,epic name 1,IN_PROGRESS,epic with subtasks,04.08.2022 14:51,5,
-2,EPIC,epic name 2,NEW,epic without subtasks,,0,
-3,SUBTASK,subtask name 1,NEW,subtask description 1,04.08.2022 14:51,5,1
-4,SUBTASK,subtask name 2,DONE,subtask description 2,,0,1
+0,EPIC,name,NEW,description,,0,
 
-0,1,2,3,4
+0
