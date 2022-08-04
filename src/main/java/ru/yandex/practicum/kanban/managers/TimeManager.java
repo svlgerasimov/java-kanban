@@ -37,7 +37,7 @@ public class TimeManager {
             if (startTime2 == null) {
                 return -1;
             }
-            return startTime1.compareTo(startTime2);    // здесь нуля уже не будет
+            return startTime1.compareTo(startTime2);    // здесь уже не будет равного времени
         });
     }
 

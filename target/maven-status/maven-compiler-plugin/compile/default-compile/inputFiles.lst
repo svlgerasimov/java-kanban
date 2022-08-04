@@ -1,0 +1,17 @@
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\filebacked\WrongCSVFormatException.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\inmemory\InMemoryTaskManager.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\tasks\Subtask.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\inmemory\InMemoryHistoryManager.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\TaskManager.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\tasks\TaskStatus.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\filebacked\CSVUtil.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\tasks\Epic.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\filebacked\FileBackedTaskManager.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\TimeManager.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\HistoryManager.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\tasks\Task.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\filebacked\ManagerLoadException.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\filebacked\ManagerSaveException.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\tasks\TaskType.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\Main.java
+C:\Users\Sergey\dev\java-kanban\src\main\java\ru\yandex\practicum\kanban\managers\Managers.java
