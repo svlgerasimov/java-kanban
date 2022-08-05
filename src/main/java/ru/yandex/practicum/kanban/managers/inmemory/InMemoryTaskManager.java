@@ -164,8 +164,6 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             timeManager.addTask(previous);
         }
-
-
     }
 
     @Override
@@ -296,36 +294,6 @@ public class InMemoryTaskManager implements TaskManager {
             return TaskStatus.DONE;
         }
         return TaskStatus.IN_PROGRESS;
-
-//        int validSubtasks = 0;
-//        int newSubtasks = 0;
-//        int doneSubtasks = 0;
-//
-//        for (Integer subtaskId : epic.getSubtaskIds()) {
-//            Subtask subtask = subtasks.get(subtaskId);
-//            if (subtask == null) {
-//                continue;
-//            }
-//            validSubtasks++;
-//            TaskStatus subtaskStatus = subtask.getStatus();
-//            if (TaskStatus.IN_PROGRESS.equals(subtaskStatus)) {
-//                epic.setStatus(TaskStatus.IN_PROGRESS);
-//                return;
-//            }
-//            if (TaskStatus.NEW.equals(subtaskStatus)) {
-//                newSubtasks++;
-//            } else if (TaskStatus.DONE.equals(subtaskStatus)) {
-//                doneSubtasks++;
-//            }
-//        }
-//
-//        if (validSubtasks == 0 || newSubtasks == validSubtasks) {
-//            epic.setStatus(TaskStatus.NEW);
-//        } else if (doneSubtasks == validSubtasks) {
-//            epic.setStatus(TaskStatus.DONE);
-//        } else {
-//            epic.setStatus(TaskStatus.IN_PROGRESS);
-//        }
     }
 
     private void updateEpicTime(Epic epic) {

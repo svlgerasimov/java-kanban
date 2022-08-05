@@ -57,14 +57,9 @@ public final class CSVUtil {
             final LocalDateTime startTime =
                     formattedDateTime.isEmpty() ? null : LocalDateTime.parse(formattedDateTime, FORMATTER);
             final int duration = Integer.parseInt(words[6]);
-//            if (words.length > 4) {
-//                description = words[4];
-//            } else {
-//                description = "";   //если описание задачи пусто, split обрежет этот столбец, т.к. он последний
-//            }
             switch (type) {
                 case TASK:
-                    return new Task(id,name, description, status, startTime, duration);
+                    return new Task(id, name, description, status, startTime, duration);
                 case SUBTASK:
                     final int epic = Integer.parseInt(words[7]);
                     return new Subtask(id, name, description, status, epic, startTime, duration);
@@ -101,60 +96,4 @@ public final class CSVUtil {
         }
         return result;
     }
-
-//    //Класс для конвертации строк CSV файла в поля классов задач и обратно
-//    public static class TaskFieldsCSV {
-//        private final int id;
-//        private final TaskType type;
-//        private final String name;
-//        private final TaskStatus status;
-//        private final String description;
-//        private final Integer epic;
-//
-//        public TaskFieldsCSV(String csvLine) {
-//            try {
-//                String[] words = csvLine.split(DELIMITER);
-//                id = Integer.parseInt(words[0]);
-//                type = TaskType.valueOf(words[1]);
-//                name = words[2];
-//                status = TaskStatus.valueOf(words[3]);
-//                if (words.length > 4) {
-//                    description = words[4];
-//                } else {
-//                    description = "";   //если описание задачи пусто, split обрежет этот столбец, т.к. он последний
-//                }
-//                if (TaskType.SUBTASK.equals(type)) {
-//                    epic = Integer.valueOf(words[5]);
-//                } else {
-//                    epic = null;
-//                }
-//            } catch (Exception e) {
-//                throw new WrongCSVFormatException("CSV format error in line {" + csvLine + "}");
-//            }
-//        }
-//
-//        public int getId() {
-//            return id;
-//        }
-//
-//        public TaskType getType() {
-//            return type;
-//        }
-//
-//        public String getName() {
-//            return name;
-//        }
-//
-//        public TaskStatus getStatus() {
-//            return status;
-//        }
-//
-//        public String getDescription() {
-//            return description;
-//        }
-//
-//        public Integer getEpic() {
-//            return epic;
-//        }
-//    }
 }

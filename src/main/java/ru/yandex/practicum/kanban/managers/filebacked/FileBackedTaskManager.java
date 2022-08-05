@@ -66,7 +66,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return taskManager;
     }
 
-    //здесь нельзя использовать родительские addTask и т.д., т.к. они подменяют id
+    // Здесь нельзя использовать родительские addTask и т.д., т.к. они подменяют id
     private void addTaskFromString(String line) {
         Task task = CSVUtil.taskFromString(line);
         switch (task.getType()) {
@@ -94,33 +94,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         if (taskId >= nextId) {
             nextId = taskId + 1;
         }
-
-//        TaskFieldsCSV taskFieldsCSV = new TaskFieldsCSV(line);
-//        switch (taskFieldsCSV.getType()) {
-//            case TASK:
-//                Task task = new Task(taskFieldsCSV.getId(), taskFieldsCSV.getName(),
-//                        taskFieldsCSV.getDescription(), taskFieldsCSV.getStatus());
-//                tasks.put(task.getId(), task);
-//                break;
-//            case EPIC:
-//                Epic epic = new Epic(taskFieldsCSV.getId(), taskFieldsCSV.getName(), taskFieldsCSV.getDescription());
-//                epics.put(epic.getId(), epic);
-//                break;
-//            case SUBTASK:
-//                Subtask subtask = new Subtask(taskFieldsCSV.getId(), taskFieldsCSV.getName(),
-//                        taskFieldsCSV.getDescription(), taskFieldsCSV.getStatus(), taskFieldsCSV.getEpic());
-//                Epic parentEpic = epics.get(subtask.getEpicId());
-//                if (parentEpic != null) {
-//                    subtasks.put(subtask.getId(), subtask);
-//                    parentEpic.addSubtask(subtask.getId());
-//                    updateEpicStatus(parentEpic);
-//                }
-//                break;
-//        }
-//        int taskId = taskFieldsCSV.getId();
-//        if (taskId >= nextId) {
-//            nextId = taskId + 1;
-//        }
     }
 
 

@@ -8,6 +8,8 @@ import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,17 +17,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public abstract class TaskManagerTest<T extends TaskManager> {
 
     protected T taskManager;
+    protected final LocalDateTime DEFAULT_TIME =
+            LocalDateTime.of(2022, Month.JANUARY, 1, 1, 1, 30);
 
     // Тесты addTask()
 
     // Так как add меняет id, то может быть реализация, в которой equals будет false
     // (например возвращается копия, дополненная правильным id),
-    // поэтому сравнение по неизменяющимся полям
+    // поэтому сравнение по не изменяющимся полям
     @Test
     public void addNewTaskTest() {
-        final LocalDateTime startTime = LocalDateTime.now();
         final int duration = 10;
-        Task task = new Task(0, "name", "description", TaskStatus.NEW, startTime, duration);
+        Task task = new Task(0, "name", "description", TaskStatus.NEW, DEFAULT_TIME, duration);
         Task returnedTask = taskManager.addTask(task);
         assertNotNull(returnedTask, "Не возвращается задача");
         assertEquals(task.getName(), returnedTask.getName(), "Не совпадает имя");
@@ -71,7 +74,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, history.size(), "Задача не добавлена в историю");
         assertEquals(task, history.get(0), "В историю добавлена неверная задача");
     }
-
 
     // Тесты getTasks()
 
@@ -389,14 +391,13 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void addNewSubtaskTest() {
-        final LocalDateTime startTime = LocalDateTime.now();
         final int duration = 10;
         Epic epic = taskManager.addEpic(new Epic(0, "epic name", "epic description"));
         final int epicId = epic.getId();
         final int anotherEpicId = taskManager.addEpic(
                 new Epic(0, "another epic name", "another epic description")).getId();
         taskManager.addSubtask(new Subtask(0, "another subtask name",
-                "another subtask description", TaskStatus.NEW, anotherEpicId, startTime, duration));
+                "another subtask description", TaskStatus.NEW, anotherEpicId, DEFAULT_TIME, duration));
         Subtask subtask = new Subtask(0, "name", "description", TaskStatus.NEW, epicId);
         Subtask returnedSubtask = taskManager.addSubtask(subtask);
         assertNotNull(returnedSubtask, "Не возвращается задача");
@@ -605,8 +606,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "id подзадач не удалены из эпика");
     }
 
-    // Тесты обновления статуса эпика - для разных сценариев;
-    // недостаточно тестировать updateEpicStatus, т.к. нет гарантий, что при рефакторинге он не пропадёт откуда-нибудь
+    // Тесты обновления статуса эпика - для разных сценариев
 
     // проверка на правильные статус, время начала и продолжительность при создании эпика - в addNewEpicTest
     @Test
@@ -644,7 +644,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void updateEpicTimeOnAddSubtasksTest() {
-        final LocalDateTime startTime1 = LocalDateTime.now().withSecond(0).withNano(0);
+        final LocalDateTime startTime1 = DEFAULT_TIME.withSecond(0).withNano(0);
         final int duration1 = 10;
         final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
         final int duration2 = 20;
@@ -728,7 +728,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void updateEpicTimeOnUpdateSubtaskTest() {
-        final LocalDateTime startTime1 = LocalDateTime.now().withSecond(0).withNano(0);
+        final LocalDateTime startTime1 = DEFAULT_TIME.withSecond(0).withNano(0);
         final int duration1 = 10;
         final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
         final int duration2 = 20;
@@ -846,7 +846,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void updateEpicTimeOnRemoveSubtaskTest() {
-        final LocalDateTime startTime1 = LocalDateTime.now().withSecond(0).withNano(0);
+        final LocalDateTime startTime1 = DEFAULT_TIME.withSecond(0).withNano(0);
         final int duration1 = 10;
         final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
         final int duration2 = 20;
@@ -909,7 +909,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void updateEpicTimeOnClearSubtasksTest() {
-        final LocalDateTime startTime1 = LocalDateTime.now().withSecond(0).withNano(0);
+        final LocalDateTime startTime1 = DEFAULT_TIME;
         final int duration1 = 10;
         final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
         final int duration2 = 20;
@@ -928,7 +928,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getPrioritizedTasksTest() {
-        final LocalDateTime startTime1 = LocalDateTime.now().withSecond(0).withNano(0);
+        final LocalDateTime startTime1 = DEFAULT_TIME;
         final int duration1 = 10;
         final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
         final int duration2 = 20;
@@ -953,9 +953,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
         assertEquals(6, prioritizedTasks.size(), "Возвращается неверное количество задач");
-        assertEquals(subtask1, prioritizedTasks.get(0), "Неверный порядок задач");
-        assertEquals(task1, prioritizedTasks.get(1), "Неверный порядок задач");
-        assertEquals(subtask2, prioritizedTasks.get(2), "Неверный порядок задач");
-        assertEquals(task2, prioritizedTasks.get(3), "Неверный порядок задач");
+        assertArrayEquals(new Task[] {subtask1, task1, subtask2, task2},
+                Arrays.copyOf(prioritizedTasks.toArray(), 4));
     }
 }

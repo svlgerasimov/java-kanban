@@ -11,6 +11,7 @@ import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,7 +39,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     public void loadManagerFilledTest() {
         Task task = taskManager.addTask(
                 new Task(0, "task name", "task description", TaskStatus.DONE,
-                        LocalDateTime.now(), 10));
+                        DEFAULT_TIME, 10));
         int taskId = task.getId();
         Epic epic1 = taskManager.addEpic(new Epic(0, "epic name 1", "epic with subtasks"));
         int epicId1 = epic1.getId();
@@ -47,7 +48,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         int epicId2 = epic2.getId();
         Subtask subtask1 = taskManager.addSubtask(
                 new Subtask(0, "subtask name 1", "subtask description 1", TaskStatus.NEW, epicId1,
-                        LocalDateTime.now(), 5));
+                        DEFAULT_TIME.plusMinutes(10), 5));
         int subtaskId1 = subtask1.getId();
         Subtask subtask2 = taskManager.addSubtask(
                 new Subtask(0, "subtask name 2", "subtask description 2", TaskStatus.DONE, epicId1));
@@ -91,7 +92,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void loadPrioritizedTasksTest() {
-        final LocalDateTime startTime1 = LocalDateTime.now().withSecond(0).withNano(0);
+        final LocalDateTime startTime1 = DEFAULT_TIME;
         final int duration1 = 10;
         final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
         final int duration2 = 20;
@@ -117,9 +118,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         List<Task> prioritizedTasks = restored.getPrioritizedTasks();
         assertNotNull(prioritizedTasks, "Не возвращается список задач");
         assertEquals(6, prioritizedTasks.size(), "Возвращается неверное количество задач");
-        assertEquals(subtask1, prioritizedTasks.get(0), "Неверный порядок задач");
-        assertEquals(task1, prioritizedTasks.get(1), "Неверный порядок задач");
-        assertEquals(subtask2, prioritizedTasks.get(2), "Неверный порядок задач");
-        assertEquals(task2, prioritizedTasks.get(3), "Неверный порядок задач");
+        assertArrayEquals(new Task[] {subtask1, task1, subtask2, task2},
+                Arrays.copyOf(prioritizedTasks.toArray(), 4), "Неверный порядок задач");
     }
 }
