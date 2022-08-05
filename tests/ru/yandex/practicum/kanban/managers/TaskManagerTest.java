@@ -23,12 +23,16 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     // поэтому сравнение по неизменяющимся полям
     @Test
     public void addNewTaskTest() {
-        Task task = new Task(0, "name", "description", TaskStatus.NEW);
+        final LocalDateTime startTime = LocalDateTime.now();
+        final int duration = 10;
+        Task task = new Task(0, "name", "description", TaskStatus.NEW, startTime, duration);
         Task returnedTask = taskManager.addTask(task);
         assertNotNull(returnedTask, "Не возвращается задача");
         assertEquals(task.getName(), returnedTask.getName(), "Не совпадает имя");
         assertEquals(task.getDescription(), returnedTask.getDescription(), "Не совпадает описание");
         assertEquals(task.getStatus(), returnedTask.getStatus(), "Не совпадает статус");
+        assertEquals(task.getStartTime(), returnedTask.getStartTime(), "Не совпадает время начала");
+        assertEquals(task.getDuration(), returnedTask.getDuration(), "Не совпадает продолжительность");
     }
 
     @Test
@@ -385,12 +389,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void addNewSubtaskTest() {
+        final LocalDateTime startTime = LocalDateTime.now();
+        final int duration = 10;
         Epic epic = taskManager.addEpic(new Epic(0, "epic name", "epic description"));
         final int epicId = epic.getId();
         final int anotherEpicId = taskManager.addEpic(
                 new Epic(0, "another epic name", "another epic description")).getId();
         taskManager.addSubtask(new Subtask(0, "another subtask name",
-                "another subtask description", TaskStatus.NEW, anotherEpicId));
+                "another subtask description", TaskStatus.NEW, anotherEpicId, startTime, duration));
         Subtask subtask = new Subtask(0, "name", "description", TaskStatus.NEW, epicId);
         Subtask returnedSubtask = taskManager.addSubtask(subtask);
         assertNotNull(returnedSubtask, "Не возвращается задача");
@@ -398,6 +404,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(subtask.getDescription(), returnedSubtask.getDescription(), "Не совпадает описание");
         assertEquals(subtask.getStatus(), returnedSubtask.getStatus(), "Не совпадает статус");
         assertEquals(subtask.getEpicId(), returnedSubtask.getEpicId(), "Не совпадает id эпика");
+        assertEquals(subtask.getStartTime(), returnedSubtask.getStartTime(), "Не совпадает время начала");
+        assertEquals(subtask.getDuration(), returnedSubtask.getDuration(), "Не совпадает продолжительность");
 
         assertEquals(1, taskManager.getEpic(epicId).getSubtaskIds().size(),
                 "Id подзадачи не добавлен в эпик");
