@@ -189,6 +189,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void clearEpics() {
         clearTasksFromMap(epics);
+        for (Subtask subtask : subtasks.values()) {
+            timeManager.removeTask(subtask);
+        }
         clearTasksFromMap(subtasks);
     }
 
@@ -244,7 +247,8 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         for (Integer subtaskId : epic.getSubtaskIds()) {
-            removeTaskFromMap(subtasks, subtaskId);
+            Subtask subtask = removeTaskFromMap(subtasks, subtaskId);
+            timeManager.removeTask(subtask);
         }
     }
 
@@ -308,30 +312,17 @@ public class InMemoryTaskManager implements TaskManager {
                 .map(Subtask::getStartTime)
                 .filter(Objects::nonNull)
                 .min(LocalDateTime::compareTo);
-        if (startTime.isEmpty()) {
-            epic.setStartTime(null);
-            epic.setEndTime(null);
-            epic.setDuration(0);
-            return;
-        }
         Optional<LocalDateTime> endTime = validSubtasks.stream()
                 .map(Subtask::getEndTime)
                 .filter(Objects::nonNull)
                 .max(LocalDateTime::compareTo);
-        if (endTime.isEmpty()) {
-            epic.setStartTime(null);
-            epic.setEndTime(null);
-            epic.setDuration(0);
-            return;
-        }
         int duration = validSubtasks.stream()
                 .mapToInt(Subtask::getDuration)
                 .sum();
 
-        epic.setStartTime(startTime.get());
-        epic.setEndTime(endTime.get());
+        epic.setStartTime(startTime.orElse(null));
+        epic.setEndTime(endTime.orElse(null));
         epic.setDuration(duration);
-//        epic.setDuration((int) Duration.between(startTime.get(), endTime.get()).toMinutes());
     }
 
     @Override

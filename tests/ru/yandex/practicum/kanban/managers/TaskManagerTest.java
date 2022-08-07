@@ -6,7 +6,6 @@ import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Arrays;
@@ -967,7 +966,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void getPrioritizedTasksTest() {
+    public void getPrioritizedTasksOnAddAndRemoveTest() {
         final LocalDateTime startTime1 = DEFAULT_TIME;
         final int duration1 = 10;
         final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
@@ -979,15 +978,21 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         assertNotNull(taskManager.getPrioritizedTasks(), "Не возвращается список задач");
         final int epicId = taskManager.addEpic(new Epic(0,"name", "description")).getId();
+        // задача без метки времени
         taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW));
+        // первая задача с меткой времени
         Task task1 = taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW,
                 startTime2, duration2));
+        // задача в конце
         Task task2 = taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW,
                 startTime4, duration4));
+        // подзадаче без метки времени
         taskManager.addSubtask(new Subtask(0, "name", "description",
                 TaskStatus.NEW, epicId));
+        // подзадача в начале
         Subtask subtask1 = taskManager.addSubtask(new Subtask(0, "name", "description",
                 TaskStatus.NEW, epicId, startTime1, duration1));
+        // подзадача в середине
         Subtask subtask2 = taskManager.addSubtask(new Subtask(0, "name", "description",
                 TaskStatus.NEW, epicId, startTime3, duration3));
 
@@ -995,5 +1000,145 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(6, prioritizedTasks.size(), "Возвращается неверное количество задач");
         assertArrayEquals(new Task[] {subtask1, task1, subtask2, task2},
                 Arrays.copyOf(prioritizedTasks.toArray(), 4));
+
+        // удаление задачи в середине
+        taskManager.removeTask(task1.getId());
+        prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(5, prioritizedTasks.size(), "Возвращается неверное количество задач");
+        assertArrayEquals(new Task[] {subtask1, subtask2, task2},
+                Arrays.copyOf(prioritizedTasks.toArray(), 3));
+
+        // удаление задачи в конце
+        taskManager.removeTask(task2.getId());
+        prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(4, prioritizedTasks.size(), "Возвращается неверное количество задач");
+        assertArrayEquals(new Task[] {subtask1, subtask2},
+                Arrays.copyOf(prioritizedTasks.toArray(), 2));
+
+        // удаление подзадачи в начале
+        taskManager.removeSubtask(subtask1.getId());
+        prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(3, prioritizedTasks.size(), "Возвращается неверное количество задач");
+        assertEquals(subtask2, prioritizedTasks.get(0));
+
+        // удаление последней подзадачи с меткой времени
+        taskManager.removeSubtask(subtask2.getId());
+        prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(2, prioritizedTasks.size(), "Возвращается неверное количество задач");
+    }
+
+    @Test
+    public void getPrioritizedTasksOnUpdateTest() {
+        final LocalDateTime startTime1 = DEFAULT_TIME;
+        final int duration1 = 10;
+        final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
+        final int duration2 = 20;
+        final LocalDateTime startTime3 = startTime2.plusMinutes(duration2 + 10);
+        final int duration3 = 30;
+        final LocalDateTime startTime4 = startTime3.plusMinutes(duration3 + 10);
+        final int duration4 = 40;
+
+        assertNotNull(taskManager.getPrioritizedTasks(), "Не возвращается список задач");
+        final int epicId = taskManager.addEpic(new Epic(0,"name", "description")).getId();
+        int[] taskIds = new int[3];
+        int[] subtaskIds = new int[3];
+        for (int i = 0; i < 3; i++) {
+            taskIds[i] = taskManager.addTask(
+                    new Task(0, "name", "description", TaskStatus.NEW)).getId();
+            subtaskIds[i] = taskManager.addSubtask(new Subtask(0, "name", "description",
+                    TaskStatus.NEW, epicId)).getId();
+        }
+        // первая задача с меткой времени
+        Task task1 = new Task(taskIds[0], "name", "description", TaskStatus.NEW,
+                startTime2, duration2);
+        taskManager.updateTask(task1);
+        // задача в конце
+        Task task2 = new Task(taskIds[1], "name", "description", TaskStatus.NEW,
+                startTime4, duration4);
+        taskManager.updateTask(task2);
+        // подзадача в начале
+        Subtask subtask1 = new Subtask(subtaskIds[0], "name", "description",
+                TaskStatus.NEW, epicId, startTime1, duration1);
+        taskManager.updateSubtask(subtask1);
+        // подзадача в середине
+        Subtask subtask2 = new Subtask(subtaskIds[1], "name", "description",
+                TaskStatus.NEW, epicId, startTime3, duration3);
+        taskManager.updateSubtask(subtask2);
+
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(6, prioritizedTasks.size(), "Возвращается неверное количество задач");
+        assertArrayEquals(new Task[] {subtask1, task1, subtask2, task2},
+                Arrays.copyOf(prioritizedTasks.toArray(), 4));
+    }
+
+    @Test
+    public void getPrioritizedTasksOnClearTasksTest() {
+        final LocalDateTime startTime1 = DEFAULT_TIME;
+        final int duration1 = 10;
+        final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
+        final int duration2 = 20;
+
+        taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW,
+                startTime1, duration1));
+        taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW,
+                startTime2, duration2));
+        taskManager.clearTasks();
+
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, prioritizedTasks.size(), "Возвращается неверное количество задач");
+    }
+
+    @Test
+    public void getPrioritizedTasksOnClearSubtasksTest() {
+        final LocalDateTime startTime1 = DEFAULT_TIME;
+        final int duration1 = 10;
+        final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
+        final int duration2 = 20;
+
+        final int epicId = taskManager.addEpic(new Epic(0,"name", "description")).getId();
+        taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
+                startTime1, duration1));
+        taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
+                startTime2, duration2));
+        taskManager.clearSubtasks();
+
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, prioritizedTasks.size(), "Возвращается неверное количество задач");
+    }
+
+    @Test
+    public void getPrioritizedTasksOnRemoveEpicTest() {
+        final LocalDateTime startTime1 = DEFAULT_TIME;
+        final int duration1 = 10;
+        final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
+        final int duration2 = 20;
+
+        final int epicId = taskManager.addEpic(new Epic(0,"name", "description")).getId();
+        taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
+                startTime1, duration1));
+        taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
+                startTime2, duration2));
+        taskManager.removeEpic(epicId);
+
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, prioritizedTasks.size(), "Возвращается неверное количество задач");
+    }
+
+    @Test
+    public void getPrioritizedTasksOnClearEpicsTest() {
+        final LocalDateTime startTime1 = DEFAULT_TIME;
+        final int duration1 = 10;
+        final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
+        final int duration2 = 20;
+
+        final int epicId = taskManager.addEpic(new Epic(0,"name", "description")).getId();
+        taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
+                startTime1, duration1));
+        taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
+                startTime2, duration2));
+        taskManager.clearEpics();
+
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, prioritizedTasks.size(), "Возвращается неверное количество задач");
     }
 }
