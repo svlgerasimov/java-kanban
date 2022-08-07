@@ -33,6 +33,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         assertEquals(0, restored.getEpics().size(), "Не пустой список эпиков");
         assertEquals(0, restored.getSubtasks().size(), "Не пустой список подзадач");
         assertEquals(0, restored.getHistory().size(), "Не пустая история");
+        assertEquals(0, restored.getPrioritizedTasks().size(),
+                "Не пустой список отсортированных задач");
     }
 
     @Test
@@ -54,25 +56,24 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
                 new Subtask(0, "subtask name 2", "subtask description 2", TaskStatus.DONE, epicId1));
         int subtaskId2 = subtask2.getId();
 
-        epic1 = taskManager.getEpic(epicId1);
+        // формируем историю
+        taskManager.getEpic(epicId1);
         taskManager.getSubtask(subtaskId1);
         taskManager.getTask(taskId);
         taskManager.getEpic(epicId2);
         taskManager.getSubtask(subtaskId2);
 
-        TaskManager restored = FileBackedTaskManager.loadFromFile(filePath);
-        List<Task> history = restored.getHistory();
-        assertEquals(epic1, history.get(0), "Неверно восстановлена история");
-        assertEquals(subtask1, history.get(1), "Неверно восстановлена история");
-        assertEquals(task, history.get(2), "Неверно восстановлена история");
-        assertEquals(epic2, history.get(3), "Неверно восстановлена история");
-        assertEquals(subtask2, history.get(4), "Неверно восстановлена история");
-
-        assertEquals(task, restored.getTask(taskId), "Неверно восстановлены задачи");
-        assertEquals(epic1, restored.getEpic(epicId1), "Неверно восстановлены задачи");
-        assertEquals(epic2, restored.getEpic(epicId2), "Неверно восстановлены задачи");
-        assertEquals(subtask1, restored.getSubtask(subtaskId1), "Неверно восстановлены задачи");
-        assertEquals(subtask2, restored.getSubtask(subtaskId2), "Неверно восстановлены задачи");
+        TaskManager restoredTaskManager = FileBackedTaskManager.loadFromFile(filePath);
+        assertEquals(taskManager.getTasks(), restoredTaskManager.getTasks(),
+                "Список задач после выгрузки не совпадает");
+        assertEquals(taskManager.getSubtasks(), restoredTaskManager.getSubtasks(),
+                "Список подзадач после выгрузки не совпадает");
+        assertEquals(taskManager.getEpics(), restoredTaskManager.getEpics(),
+                "Список эпиков после выгрузки не совпадает");
+        assertEquals(taskManager.getHistory(), restoredTaskManager.getHistory(),
+                "История после выгрузки не совпадает");
+        assertEquals(taskManager.getPrioritizedTasks(), restoredTaskManager.getPrioritizedTasks(),
+                "Отсортированный список задач после выгрузки не совпадает");
     }
 
     @Test
@@ -88,37 +89,5 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         assertEquals(task, restored.getTask(taskId), "Неверно восстановлена задача");
         assertEquals(subtask, restored.getSubtask(subtaskId), "Неверно восстановлена подзадача");
         assertEquals(epic, restored.getEpic(epicId), "Неверно восстановлен эпик");
-    }
-
-    @Test
-    public void loadPrioritizedTasksTest() {
-        final LocalDateTime startTime1 = DEFAULT_TIME;
-        final int duration1 = 10;
-        final LocalDateTime startTime2 = startTime1.plusMinutes(duration1 + 10);
-        final int duration2 = 20;
-        final LocalDateTime startTime3 = startTime2.plusMinutes(duration2 + 10);
-        final int duration3 = 30;
-        final LocalDateTime startTime4 = startTime3.plusMinutes(duration3 + 10);
-        final int duration4 = 40;
-
-        final int epicId = taskManager.addEpic(new Epic(0,"name", "description")).getId();
-        taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW));
-        Task task1 = taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW,
-                startTime2, duration2));
-        Task task2 = taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW,
-                startTime4, duration4));
-        taskManager.addSubtask(new Subtask(0, "name", "description",
-                TaskStatus.NEW, epicId));
-        Subtask subtask1 = taskManager.addSubtask(new Subtask(0, "name", "description",
-                TaskStatus.NEW, epicId, startTime1, duration1));
-        Subtask subtask2 = taskManager.addSubtask(new Subtask(0, "name", "description",
-                TaskStatus.NEW, epicId, startTime3, duration3));
-
-        TaskManager restored = FileBackedTaskManager.loadFromFile(filePath);
-        List<Task> prioritizedTasks = restored.getPrioritizedTasks();
-        assertNotNull(prioritizedTasks, "Не возвращается список задач");
-        assertEquals(6, prioritizedTasks.size(), "Возвращается неверное количество задач");
-        assertArrayEquals(new Task[] {subtask1, task1, subtask2, task2},
-                Arrays.copyOf(prioritizedTasks.toArray(), 4), "Неверный порядок задач");
     }
 }

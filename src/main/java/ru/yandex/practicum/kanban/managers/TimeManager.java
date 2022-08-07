@@ -26,12 +26,6 @@ public class TimeManager {
             if (Objects.equals(task1, task2)) {
                 return 0;
             }
-            if (task1 == null) {
-                return 1;
-            }
-            if (task2 == null) {
-                return -1;
-            }
             LocalDateTime startTime1 = task1.getStartTime();
             LocalDateTime startTime2 = task2.getStartTime();
             // Если время начала двух задач равно (прежде всего случай startTime == null,
