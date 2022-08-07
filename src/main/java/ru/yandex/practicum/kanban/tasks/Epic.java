@@ -1,6 +1,7 @@
 package ru.yandex.practicum.kanban.tasks;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -52,6 +53,8 @@ public class Epic extends Task {
     public String toString() {
         return "Epic{" +
                 super.toString() +
+                ", endTime=" +
+                (endTime == null ? null : endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))) +
                 ", subtaskIds=" + subtaskIds + "}";
     }
 
@@ -61,11 +64,11 @@ public class Epic extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
-        return Objects.equals(subtaskIds, epic.subtaskIds);
+        return Objects.equals(subtaskIds, epic.subtaskIds) && Objects.equals(endTime, epic.endTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subtaskIds);
+        return Objects.hash(super.hashCode(), subtaskIds, endTime);
     }
 }
