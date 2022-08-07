@@ -1,11 +1,13 @@
 package ru.yandex.practicum.kanban.tasks;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Epic extends Task {
     private final List<Integer> subtaskIds;
+    private LocalDateTime endTime;
 
     // В конструкторе нет статуса, т.к. он рассчитывается на основе подзадач,
     // конструктора с временем тоже нет, по той же причине
@@ -35,6 +37,15 @@ public class Epic extends Task {
     @Override
     public TaskType getType() {
         return TaskType.EPIC;
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     @Override

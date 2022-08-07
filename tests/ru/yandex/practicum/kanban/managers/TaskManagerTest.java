@@ -658,34 +658,47 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         // добавление одной подзадачи
         taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
                 startTime2, duration2));
-        assertEquals(startTime2, taskManager.getEpic(epicId).getStartTime(),
+        Epic epic = taskManager.getEpic(epicId);
+        int duration = duration2;
+        assertEquals(startTime2, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals(duration2, taskManager.getEpic(epicId).getDuration(),
+        assertEquals(duration, epic.getDuration(),
                 "Неверно рассчитана длительность эпика");
+        assertEquals(startTime2.plusMinutes(duration2), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // добавление в начало
         taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
                 startTime1, duration1));
-        assertEquals(startTime1, taskManager.getEpic(epicId).getStartTime(),
+        epic = taskManager.getEpic(epicId);
+        duration += duration1;
+        assertEquals(startTime1, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals((int) Duration.between(startTime1, startTime2).toMinutes() + duration2,
-                taskManager.getEpic(epicId).getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime2.plusMinutes(duration2), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // добавление в конец
         taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
                 startTime4, duration4));
-        assertEquals(startTime1, taskManager.getEpic(epicId).getStartTime(),
+        epic = taskManager.getEpic(epicId);
+        duration += duration4;
+        assertEquals(startTime1, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals((int) Duration.between(startTime1, startTime4).toMinutes() + duration4,
-                taskManager.getEpic(epicId).getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime4.plusMinutes(duration4), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // добавление в середину
         taskManager.addSubtask(new Subtask(0, "name", "description", TaskStatus.NEW, epicId,
                 startTime3, duration3));
-        assertEquals(startTime1, taskManager.getEpic(epicId).getStartTime(),
+        epic = taskManager.getEpic(epicId);
+        duration += duration3;
+        assertEquals(startTime1, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals((int) Duration.between(startTime1, startTime4).toMinutes() + duration4,
-                taskManager.getEpic(epicId).getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime4.plusMinutes(duration4), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
     }
 
     @Test
@@ -750,34 +763,46 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         // обновление одной подзадачи
         taskManager.updateSubtask(new Subtask(subtaskId2, "name", "description", TaskStatus.NEW,
                 epicId, startTime2, duration2));
-        assertEquals(startTime2, taskManager.getEpic(epicId).getStartTime(),
+        Epic epic = taskManager.getEpic(epicId);
+        int duration = duration2;
+        assertEquals(startTime2, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals(duration2, taskManager.getEpic(epicId).getDuration(),
-                "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime2.plusMinutes(duration2), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // обновление в начале
         taskManager.updateSubtask(new Subtask(subtaskId1, "name", "description", TaskStatus.NEW,
                 epicId, startTime1, duration1));
-        assertEquals(startTime1, taskManager.getEpic(epicId).getStartTime(),
+        epic = taskManager.getEpic(epicId);
+        duration += duration1;
+        assertEquals(startTime1, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals((int) Duration.between(startTime1, startTime2).toMinutes() + duration2,
-                taskManager.getEpic(epicId).getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime2.plusMinutes(duration2), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // обновление в конце
         taskManager.updateSubtask(new Subtask(subtaskId4, "name", "description", TaskStatus.NEW,
                 epicId, startTime4, duration4));
-        assertEquals(startTime1, taskManager.getEpic(epicId).getStartTime(),
+        epic = taskManager.getEpic(epicId);
+        duration += duration4;
+        assertEquals(startTime1, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals((int) Duration.between(startTime1, startTime4).toMinutes() + duration4,
-                taskManager.getEpic(epicId).getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime4.plusMinutes(duration4), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // обновление в середине
         taskManager.updateSubtask(new Subtask(subtaskId3, "name", "description", TaskStatus.NEW,
                 epicId, startTime3, duration3));
-        assertEquals(startTime1, taskManager.getEpic(epicId).getStartTime(),
+        epic = taskManager.getEpic(epicId);
+        duration += duration3;
+        assertEquals(startTime1, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals((int) Duration.between(startTime1, startTime4).toMinutes() + duration4,
-                taskManager.getEpic(epicId).getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime4.plusMinutes(duration4), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // обновление на подзадачи без данных о времени
         taskManager.updateSubtask(new Subtask(subtaskId1, "name", "description",
@@ -788,9 +813,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 TaskStatus.NEW, epicId));
         taskManager.updateSubtask(new Subtask(subtaskId4, "name", "description",
                 TaskStatus.NEW, epicId));
-        assertNull(taskManager.getEpic(epicId).getStartTime(), "Неверно рассчитано начало эпика");
-        assertEquals(0, taskManager.getEpic(epicId).getDuration(),
+        epic = taskManager.getEpic(epicId);
+        assertNull(epic.getStartTime(), "Неверно рассчитано начало эпика");
+        assertEquals(0, epic.getDuration(),
                 "Неверно рассчитана длительность эпика");
+        assertNull(epic.getEndTime(),"Неверно рассчитано окончание эпика");
     }
 
     @Test
@@ -867,30 +894,41 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         // удаление из начала
         taskManager.removeSubtask(subtaskId1);
-        assertEquals(startTime2, taskManager.getEpic(epicId).getStartTime(),
+        Epic epic = taskManager.getEpic(epicId);
+        int duration = duration2 + duration3 + duration4;
+        assertEquals(startTime2, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals((int) Duration.between(startTime2, startTime4).toMinutes() + duration4,
-                taskManager.getEpic(epicId).getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime4.plusMinutes(duration4), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // удаление из середины
         taskManager.removeSubtask(subtaskId3);
-        assertEquals(startTime2, taskManager.getEpic(epicId).getStartTime(),
+        epic = taskManager.getEpic(epicId);
+        duration -= duration3;
+        assertEquals(startTime2, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals((int) Duration.between(startTime2, startTime4).toMinutes() + duration4,
-                taskManager.getEpic(epicId).getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(), "Неверно рассчитана длительность эпика");
+        assertEquals(startTime4.plusMinutes(duration4), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // удаление в конце
         taskManager.removeSubtask(subtaskId4);
-        assertEquals(startTime2, taskManager.getEpic(epicId).getStartTime(),
+        epic = taskManager.getEpic(epicId);
+        duration -= duration4;
+        assertEquals(startTime2, epic.getStartTime(),
                 "Неверно рассчитано начало эпика");
-        assertEquals(duration2, taskManager.getEpic(epicId).getDuration(),
-                "Неверно рассчитана длительность эпика");
+        assertEquals(duration, epic.getDuration(),"Неверно рассчитана длительность эпика");
+        assertEquals(startTime2.plusMinutes(duration2), epic.getEndTime(),
+                "Неверно рассчитано окончание эпика");
 
         // удаление последней подзадачи
         taskManager.removeSubtask(subtaskId2);
-        assertNull(taskManager.getEpic(epicId).getStartTime(), "Неверно рассчитано начало эпика");
-        assertEquals(0, taskManager.getEpic(epicId).getDuration(),
+        epic = taskManager.getEpic(epicId);
+        assertNull(epic.getStartTime(), "Неверно рассчитано начало эпика");
+        assertEquals(0, epic.getDuration(),
                 "Неверно рассчитана длительность эпика");
+        assertNull(epic.getEndTime(), "Неверно рассчитано окончание эпика");
     }
 
     @Test
@@ -921,9 +959,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 TaskStatus.NEW, epicId, startTime2, duration2));
 
         taskManager.clearSubtasks();
-        assertNull(taskManager.getEpic(epicId).getStartTime(), "Неверно рассчитано начало эпика");
-        assertEquals(0, taskManager.getEpic(epicId).getDuration(),
+        Epic epic = taskManager.getEpic(epicId);
+        assertNull(epic.getStartTime(), "Неверно рассчитано начало эпика");
+        assertEquals(0, epic.getDuration(),
                 "Неверно рассчитана длительность эпика");
+        assertNull(epic.getEndTime(), "Неверно рассчитано окончание эпика");
     }
 
     @Test

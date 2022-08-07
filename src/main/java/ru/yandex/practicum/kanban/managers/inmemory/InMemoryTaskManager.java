@@ -310,6 +310,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .min(LocalDateTime::compareTo);
         if (startTime.isEmpty()) {
             epic.setStartTime(null);
+            epic.setEndTime(null);
             epic.setDuration(0);
             return;
         }
@@ -319,11 +320,18 @@ public class InMemoryTaskManager implements TaskManager {
                 .max(LocalDateTime::compareTo);
         if (endTime.isEmpty()) {
             epic.setStartTime(null);
+            epic.setEndTime(null);
             epic.setDuration(0);
             return;
         }
+        int duration = validSubtasks.stream()
+                .mapToInt(Subtask::getDuration)
+                .sum();
+
         epic.setStartTime(startTime.get());
-        epic.setDuration((int) Duration.between(startTime.get(), endTime.get()).toMinutes());
+        epic.setEndTime(endTime.get());
+        epic.setDuration(duration);
+//        epic.setDuration((int) Duration.between(startTime.get(), endTime.get()).toMinutes());
     }
 
     @Override
