@@ -15,7 +15,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Path filePath = Path.of("resources", "taskManager.csv");
+        Path filePath = Path.of("src","main", "resources", "taskManager.csv");
         TaskManager taskManager = Managers.getFileBacked(filePath);
 
 

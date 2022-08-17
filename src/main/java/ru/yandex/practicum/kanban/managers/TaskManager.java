@@ -18,9 +18,9 @@ public interface TaskManager {
     Task addTask(Task task);
 
     //обновляет задачу, если задача с таким id есть
-    void updateTask(Task task);
+    boolean updateTask(Task task);
 
-    void removeTask(int id);
+    boolean removeTask(int id);
 
     List<Subtask> getSubtasks();
 
@@ -33,9 +33,9 @@ public interface TaskManager {
     Subtask addSubtask(Subtask subtask);
 
     //обновляет подзадачу, если подзадача с таким id есть, и она относится к тому же эпику
-    void updateSubtask(Subtask subtask);
+    boolean updateSubtask(Subtask subtask);
 
-    void removeSubtask(int id);
+    boolean removeSubtask(int id);
 
     List<Epic> getEpics();
 
@@ -47,9 +47,9 @@ public interface TaskManager {
     Epic addEpic(Epic epic);
 
     //обновляет эпик, если эпик с таким id есть
-    void updateEpic(Epic epic);
+    boolean updateEpic(Epic epic);
 
-    void removeEpic(int id);
+    boolean removeEpic(int id);
 
     List<Subtask> getEpicsSubtasks(int epicId);
 

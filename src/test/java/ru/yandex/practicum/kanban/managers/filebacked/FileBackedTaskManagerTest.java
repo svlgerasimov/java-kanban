@@ -10,15 +10,12 @@ import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
-    private final Path filePath = Path.of("resources", "taskManager.csv");
+    private final Path filePath = Path.of("src","test", "resources", "taskManager.csv");
 
     @BeforeEach
     public void beforeEach() {

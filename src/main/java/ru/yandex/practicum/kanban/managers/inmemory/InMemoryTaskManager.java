@@ -67,14 +67,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     //обновляет задачу, если задача с таким id есть и если новые временнЫе параметры позволяют
     @Override
-    public void updateTask(Task task) {
+    public boolean updateTask(Task task) {
         if (task == null) {
-            return;
+            return false;
         }
         int id = task.getId();
         Task previous = tasks.get(id);
         if (previous == null) {
-            return;     // задачи с таким id не было
+            return false;     // задачи с таким id не было
         }
         // Чтобы проверить, что задача с новым временем подходит,
         // нужно проверить, что она не пересекается с остальными.
@@ -86,13 +86,16 @@ public class InMemoryTaskManager implements TaskManager {
             timeManager.addTask(task);
         } else {
             timeManager.addTask(previous);
+            return false;
         }
+        return true;
     }
 
     @Override
-    public void removeTask(int id) {
+    public boolean removeTask(int id) {
         Task removed = removeTaskFromMap(tasks, id);
         timeManager.removeTask(removed);
+        return removed != null;
     }
 
     @Override
@@ -142,15 +145,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     //обновляет подзадачу, если подзадача с таким id есть, и она относится к тому же эпику
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public boolean updateSubtask(Subtask subtask) {
         if (subtask == null) {
-            return;
+            return false;
         }
         int id = subtask.getId();
         Subtask previous = subtasks.get(id);
         if (previous == null || subtask.getEpicId() != previous.getEpicId()) {
             //подзадачи с таким id нет или эпик в новой версии отличается
-            return;
+            return false;
         }
         timeManager.removeTask(previous);
         if (timeManager.validateTask(subtask)) {
@@ -163,14 +166,16 @@ public class InMemoryTaskManager implements TaskManager {
             timeManager.addTask(subtask);
         } else {
             timeManager.addTask(previous);
+            return false;
         }
+        return true;
     }
 
     @Override
-    public void removeSubtask(int id) {
+    public boolean removeSubtask(int id) {
         Subtask subtask = removeTaskFromMap(subtasks, id);
         if (subtask == null) {
-            return;
+            return false;
         }
         int epicId = subtask.getEpicId();
         Epic epic = epics.get(epicId);
@@ -179,6 +184,7 @@ public class InMemoryTaskManager implements TaskManager {
             updateEpicFromSubtasks(epic);
         }
         timeManager.removeTask(subtask);
+        return true;
     }
 
     @Override
@@ -218,9 +224,9 @@ public class InMemoryTaskManager implements TaskManager {
     //обновляет эпик, если эпик с таким id есть
     //если передаётся эпик с неправильными подзадачами, заменяет на правильные
     @Override
-    public void updateEpic(Epic epic) {
+    public boolean updateEpic(Epic epic) {
         if (epic == null) {
-            return;
+            return false;
         }
         int id = epic.getId();
         Epic previous = epics.replace(id, epic);
@@ -237,19 +243,22 @@ public class InMemoryTaskManager implements TaskManager {
             }
             updateEpicFromSubtasks(epic);
             historyManager.update(epic);
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void removeEpic(int id) {
+    public boolean removeEpic(int id) {
         Epic epic = removeTaskFromMap(epics, id);
         if (epic == null) {
-            return;
+            return false;
         }
         for (Integer subtaskId : epic.getSubtaskIds()) {
             Subtask subtask = removeTaskFromMap(subtasks, subtaskId);
             timeManager.removeTask(subtask);
         }
+        return true;
     }
 
     @Override

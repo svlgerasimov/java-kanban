@@ -98,12 +98,13 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void updateTaskInEmptyListTest() {
         Task task = new Task(0, "name", "description", TaskStatus.NEW);
-        taskManager.updateTask(task);
+        assertFalse(taskManager.updateTask(task));
         assertEquals(0, taskManager.getTasks().size());
     }
 
     @Test
     public void updateNullTaskTest() {
+        assertFalse(taskManager.updateTask(null));
         assertDoesNotThrow(() -> taskManager.updateTask(null));
     }
 
@@ -112,7 +113,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task task = taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW));
         final int id = task.getId();
         Task updatedTask = new Task(id + 1, "new name", "new description", TaskStatus.IN_PROGRESS);
-        taskManager.updateTask(updatedTask);
+        assertFalse(taskManager.updateTask(updatedTask));
         assertEquals(task, taskManager.getTask(id));
     }
 
@@ -123,7 +124,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addTask(new Task(0, "name1", "description1", TaskStatus.IN_PROGRESS));
         Task updatedTask = new Task(id, "new name", "new description", TaskStatus.IN_PROGRESS);
         taskManager.getTask(id);    // для добавления в историю
-        taskManager.updateTask(updatedTask);
+        assertTrue(taskManager.updateTask(updatedTask));
 
         List<Task> history = taskManager.getHistory();
         // в такой последовательности, потому что taskManager.getTask(id) сломает проверку истории
@@ -136,13 +137,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void removeTaskFromEmptyListTest() {
         assertDoesNotThrow(() -> taskManager.removeTask(1));
+        assertFalse(taskManager.removeTask(1));
     }
 
     @Test
     public void removeTaskWithIncorrectIdTest() {
         Task task = taskManager.addTask(new Task(0, "name", "description", TaskStatus.NEW));
         final int id = task.getId();
-        taskManager.removeTask(id + 1);
+        assertFalse(taskManager.removeTask(id + 1));
         assertEquals(1, taskManager.getTasks().size());
     }
 
@@ -152,7 +154,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final int id = task.getId();
         Task anotherTask = taskManager.addTask(
                 new Task(0, "name1", "description1", TaskStatus.IN_PROGRESS));
-        taskManager.removeTask(id);
+        assertTrue(taskManager.removeTask(id));
         List<Task> tasks = taskManager.getTasks();
         assertEquals(1, tasks.size(), "Задача не удалена");
         assertEquals(anotherTask, tasks.get(0), "Удалена не та задача");
@@ -248,12 +250,13 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void updateEpicInEmptyListTest() {
         Epic epic = new Epic(0, "name", "description");
-        taskManager.updateEpic(epic);
+        assertFalse(taskManager.updateEpic(epic));
         assertEquals(0, taskManager.getEpics().size());
     }
 
     @Test
     public void updateNullEpicTest() {
+        assertFalse(taskManager.updateEpic(null));
         assertDoesNotThrow(() -> taskManager.updateEpic(null));
     }
 
@@ -262,7 +265,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = taskManager.addEpic(new Epic(0, "name", "description"));
         final int id = epic.getId();
         Epic updatedEpic = new Epic(id + 1, "new name", "new description");
-        taskManager.updateEpic(updatedEpic);
+        assertFalse(taskManager.updateEpic(updatedEpic));
         assertEquals(epic, taskManager.getEpic(id));
     }
 
@@ -273,7 +276,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addEpic(new Epic(0, "name1", "description1"));
         Epic updatedEpic = new Epic(id, "new name", "new description");
         taskManager.getEpic(id);
-        taskManager.updateEpic(updatedEpic);
+        assertTrue(taskManager.updateEpic(updatedEpic));
 
         List<Task> history = taskManager.getHistory();
         assertEquals(updatedEpic, history.get(0), "Задача не обновлена в истории");
@@ -288,7 +291,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addSubtask(new Subtask(0, "name2", "description2", TaskStatus.DONE, epicId));
         List<Integer> epicSubtasks = taskManager.getEpic(epicId).getSubtaskIds();
         Epic updatedEpic = new Epic(epicId, "new name", "new description");
-        taskManager.updateEpic(updatedEpic);
+        assertTrue(taskManager.updateEpic(updatedEpic));
         assertEquals(epicSubtasks, taskManager.getEpic(epicId).getSubtaskIds(),
                 "После обновления эпик не дополнился правильным списком подзадач");
         assertEquals(TaskStatus.IN_PROGRESS, taskManager.getEpic(epicId).getStatus(),
@@ -312,13 +315,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void removeEpicFromEmptyListTest() {
         assertDoesNotThrow(() -> taskManager.removeEpic(1));
+        assertFalse(taskManager.removeEpic(1));
     }
 
     @Test
     public void removeEpicWithIncorrectIdTest() {
         Epic epic = taskManager.addEpic(new Epic(0, "name", "description"));
         final int id = epic.getId();
-        taskManager.removeEpic(id + 1);
+        assertFalse(taskManager.removeEpic(id + 1));
         assertEquals(1, taskManager.getEpics().size());
     }
 
@@ -329,7 +333,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic anotherEpic = taskManager.addEpic(new Epic(0, "name1", "description1"));
         taskManager.addSubtask(new Subtask(0, "name1", "description1", TaskStatus.NEW, id));
         taskManager.addSubtask(new Subtask(0, "name2", "description2", TaskStatus.NEW, id));
-        taskManager.removeEpic(id);
+        assertTrue(taskManager.removeEpic(id));
         List<Epic> epics = taskManager.getEpics();
         assertEquals(1, epics.size(), "Задача не удалена");
         assertEquals(anotherEpic, epics.get(0), "Удалена не та задача");
@@ -494,13 +498,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final int epicId = taskManager.addEpic(
                 new Epic(0, "epic name", "epic description")).getId();
         Subtask subtask = new Subtask(0, "name", "description", TaskStatus.NEW, epicId);
-        taskManager.updateTask(subtask);
+        assertFalse(taskManager.updateTask(subtask));
         assertEquals(0, taskManager.getSubtasks().size());
     }
 
     @Test
     public void updateNullSubtaskTest() {
         assertDoesNotThrow(() -> taskManager.updateSubtask(null));
+        assertFalse(taskManager.updateSubtask(null));
     }
 
     @Test
@@ -510,8 +515,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask = taskManager.addSubtask(
                 new Subtask(0, "name", "description", TaskStatus.NEW, epicId));
         final int id = subtask.getId();
-        taskManager.updateSubtask(
-                new Subtask(id, "new name", "new description", TaskStatus.NEW, epicId + 1));
+        assertFalse(taskManager.updateSubtask(
+                new Subtask(id, "new name", "new description", TaskStatus.NEW, epicId + 1)));
         assertEquals(subtask, taskManager.getSubtask(id));
     }
 
@@ -524,7 +529,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final int id = subtask.getId();
         Subtask updatedSubtask =
                 new Subtask(id + 1, "new name", "new description", TaskStatus.IN_PROGRESS, epicId);
-        taskManager.updateTask(updatedSubtask);
+        assertFalse(taskManager.updateSubtask(updatedSubtask));
         assertEquals(subtask, taskManager.getSubtask(id), "Задача не обновлена");
     }
 
@@ -540,7 +545,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask updatedSubtask =
                 new Subtask(id, "new name", "new description", TaskStatus.IN_PROGRESS, epicId);
         taskManager.getSubtask(id);
-        taskManager.updateSubtask(updatedSubtask);
+        assertTrue(taskManager.updateSubtask(updatedSubtask));
 
         List<Task> history = taskManager.getHistory();
         assertEquals(updatedSubtask, history.get(0), "Задача не обновлена в истории");
@@ -552,6 +557,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void removeSubtaskFromEmptyListTest() {
         assertDoesNotThrow(() -> taskManager.removeSubtask(1));
+        assertFalse(taskManager.removeSubtask(1));
     }
 
     @Test
@@ -561,7 +567,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask = taskManager.addSubtask(
                 new Subtask(0, "name", "description", TaskStatus.NEW, epicId));
         final int id = subtask.getId();
-        taskManager.removeSubtask(id + 1);
+        assertFalse(taskManager.removeSubtask(id + 1));
         assertEquals(1, taskManager.getSubtasks().size());
     }
 
@@ -574,7 +580,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final int id = subtask.getId();
         Subtask anotherSubtask = taskManager.addSubtask(
                 new Subtask(0, "name1", "description1", TaskStatus.IN_PROGRESS, epicId));
-        taskManager.removeSubtask(id);
+        assertTrue(taskManager.removeSubtask(id));
         List<Subtask> subtasks = taskManager.getSubtasks();
         assertEquals(1, subtasks.size(), "Задача не удалена");
         assertEquals(anotherSubtask, subtasks.get(0), "Удалена не та задача");
