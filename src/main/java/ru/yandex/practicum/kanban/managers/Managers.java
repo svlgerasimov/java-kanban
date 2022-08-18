@@ -16,6 +16,8 @@ public final class Managers {
     }
 
     public static TaskManager getFileBacked(Path path) {
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(path);
+        fileBackedTaskManager.save();
         return new FileBackedTaskManager(path);
     }
 

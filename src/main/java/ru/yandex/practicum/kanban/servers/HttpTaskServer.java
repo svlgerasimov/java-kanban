@@ -26,20 +26,28 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.*;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
-    private static final int RESPONSE_CODE_OK = 200;
-    private static final int RESPONSE_CODE_BAD_REQUEST = 400;
-    private static final int RESPONSE_CODE_NOT_FOUND = 404;
-    private static final int RESPONSE_CODE_METHOD_NOT_ALLOWED = 405;
-    private static final int RESPONSE_CODE_NOT_ACCEPTABLE = 406;
+    public static final int RESPONSE_CODE_OK = 200;
+    public static final int RESPONSE_CODE_BAD_REQUEST = 400;
+    public static final int RESPONSE_CODE_NOT_FOUND = 404;
+    public static final int RESPONSE_CODE_METHOD_NOT_ALLOWED = 405;
+    public static final int RESPONSE_CODE_NOT_ACCEPTABLE = 406;
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    private static final String ENDPOINT_BASE = "tasks";
+    private static final String ENDPOINT_TASK_OPERATIONS = "task";
+    private static final String ENDPOINT_SUBTASK_OPERATIONS = "subtask";
+    private static final String ENDPOINT_EPIC_OPERATIONS = "epic";
+    private static final String ENDPOINT_HISTORY = "history";
+    private static final String ENDPOINT_EPIC_SUBTASKS = "epic";
+
     private static final Gson gson;
 
     private final HttpServer httpServer;
@@ -50,12 +58,16 @@ public class HttpTaskServer {
                 .registerTypeAdapter(LocalDateTime.class, new TypeAdapter<LocalDateTime>() {
                     @Override
                     public void write(JsonWriter jsonWriter, LocalDateTime time) throws IOException {
-                        jsonWriter.value(time == null ? null : time.format(dateTimeFormatter));
+                        jsonWriter.value(time == null ? null : time.format(DATE_TIME_FORMATTER));
                     }
 
                     @Override
                     public LocalDateTime read(JsonReader jsonReader) throws IOException {
-                        return LocalDateTime.parse(jsonReader.nextString(), dateTimeFormatter);
+                        try {
+                            return LocalDateTime.parse(jsonReader.nextString(), DATE_TIME_FORMATTER);
+                        } catch (DateTimeParseException e) {
+                            throw new JsonParseException("Incorrect DateTime format");
+                        }
                     }
                 })
                 .registerTypeAdapter(Task.class, new TaskDeserializer<>() {
@@ -82,18 +94,22 @@ public class HttpTaskServer {
     public static void main(String[] args) {
         HttpTaskServer httpTaskServer;
         try {
-            httpTaskServer = new HttpTaskServer(Path.of("src","main", "resources", "taskManager.csv"));
+            httpTaskServer = new HttpTaskServer(Path.of("src","main", "resources", "taskManager.csv"),
+                    true);
             httpTaskServer.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public HttpTaskServer(Path filePath) throws IOException {
-//        Path filePath = Path.of("resources", "taskManager.csv");
-        try {
-            taskManager = FileBackedTaskManager.loadFromFile(filePath);
-        } catch (ManagerLoadException e) {
+    public HttpTaskServer(Path filePath, boolean restoreTaskManager) throws IOException {
+        if (restoreTaskManager) {
+            try {
+                taskManager = Managers.restoreFileBacked(filePath);
+            } catch (ManagerLoadException e) {
+                taskManager = Managers.getFileBacked(filePath);
+            }
+        } else {
             taskManager = Managers.getFileBacked(filePath);
         }
 
@@ -101,7 +117,7 @@ public class HttpTaskServer {
         httpServer = HttpServer.create();
         httpServer.bind(inetSocketAddress, 0);
 
-        httpServer.createContext("/tasks", this::handleRequest);
+        httpServer.createContext("/" + ENDPOINT_BASE, this::handleRequest);
     }
 
     public void start() {
@@ -117,51 +133,53 @@ public class HttpTaskServer {
     private void handleRequest(HttpExchange exchange) throws IOException {
         String[] pathParts = exchange.getRequestURI().getPath().split("/");
         Response response;
-        if (!"tasks".equals(pathParts[1])) {    // Проверка, что отвечаем на "/tasks/*", а не "/tasks-что-то-еще/*"
+        if (!ENDPOINT_BASE.equals(pathParts[1])) { // Проверка, что отвечаем на "/tasks/*", а не "/tasks-что-то-еще/*"
 //            exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
 //            return;
-            response = new Response(RESPONSE_CODE_BAD_REQUEST, null);
+            response = new Response(RESPONSE_CODE_NOT_FOUND, null);
         } else if (pathParts.length == 2) {    // /tasks/
-            System.out.println("Handling /tasks/");
+            System.out.printf("Handling /%s/%n", ENDPOINT_BASE);
             //handlePrioritizedTasks(exchange);
             response = handleSimpleGetRequest(exchange, taskManager::getPrioritizedTasks);
 //            return;
         } else if (pathParts.length == 3) {    // /tasks/*/
             switch (pathParts[2]) {
-                case "task":    // /tasks/task/
-                    System.out.println("Handling /tasks/task");
+                case ENDPOINT_TASK_OPERATIONS:    // /tasks/task/
+                    System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_TASK_OPERATIONS);
                     response = handleTasks(exchange, Task.class,
                             taskManager::getTask, taskManager::getTasks,
                             taskManager::addTask, taskManager::updateTask,
                             taskManager::removeTask, taskManager::clearTasks);
                     break;
-                case "epic":    // /tasks/epic/
-                    System.out.println("Handling /tasks/epic");
+                case ENDPOINT_EPIC_OPERATIONS:    // /tasks/epic/
+                    System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_EPIC_OPERATIONS);
                     response = handleTasks(exchange, Epic.class,
                             taskManager::getEpic, taskManager::getEpics,
                             taskManager::addEpic, taskManager::updateEpic,
                             taskManager::removeEpic, taskManager::clearEpics);
                     break;
-                case "subtask":    // /tasks/subtask/
-                    System.out.println("Handling /tasks/subtask");
+                case ENDPOINT_SUBTASK_OPERATIONS:    // /tasks/subtask/
+                    System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_SUBTASK_OPERATIONS);
                     response = handleTasks(exchange, Subtask.class,
                             taskManager::getSubtask, taskManager::getSubtasks,
                             taskManager::addSubtask, taskManager::updateSubtask,
                             taskManager::removeSubtask, taskManager::clearSubtasks);
                     break;
-                case "history":    // /tasks/history/
-                    System.out.println("Handling /tasks/history");
+                case ENDPOINT_HISTORY:    // /tasks/history/
+                    System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_HISTORY);
                     //handleHistory(exchange);
                     response = handleSimpleGetRequest(exchange, taskManager::getHistory);
                     break;
                 default:
 //                    exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
-                    response = new Response(RESPONSE_CODE_BAD_REQUEST, null);
+                    response = new Response(RESPONSE_CODE_NOT_FOUND, null);
             }
 //            return;
-        } else if (pathParts.length == 4 && "subtask".equals(pathParts[2]) && "epic".equals(pathParts[3])) {
+        } else if (pathParts.length == 4 && ENDPOINT_SUBTASK_OPERATIONS.equals(pathParts[2])
+                && ENDPOINT_EPIC_SUBTASKS.equals(pathParts[3])) {
             // /tasks/subtask/epic/
-            System.out.println("Handling /tasks/subtask/epic");
+            System.out.printf("Handling /%s/%s/%s%n",
+                    ENDPOINT_BASE, ENDPOINT_SUBTASK_OPERATIONS, ENDPOINT_EPIC_SUBTASKS);
             response = handleEpicSubtasks(exchange);
 //            return;
         } else {
@@ -261,6 +279,7 @@ public class HttpTaskServer {
 //                break;
             case "POST":
                 try (InputStream inputStream = exchange.getRequestBody()) {
+//                    byte[] bytes = inputStream.readAllBytes();
                     String requestBody = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
 
                     // Чтобы различать запросы на добавление и обновление задач, будем считать,
@@ -353,12 +372,14 @@ public class HttpTaskServer {
         }
 
         public void send(HttpExchange exchange) throws IOException {
-            exchange.sendResponseHeaders(code, body == null ? -1 : 0);
+//            exchange.getRequestBody().close();
+            exchange.sendResponseHeaders(code, /*body == null ? -1 :*/ 0);
             if (body != null) {
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(body.getBytes(DEFAULT_CHARSET));
                 }
             }
+            exchange.close();
         }
     }
 }

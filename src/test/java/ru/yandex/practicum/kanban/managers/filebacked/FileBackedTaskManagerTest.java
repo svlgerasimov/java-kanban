@@ -20,7 +20,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     @BeforeEach
     public void beforeEach() {
         taskManager = new FileBackedTaskManager(filePath);
-        taskManager.addTask(null);  // чтобы сохранить новый пустой менеджер в файл, если в нём что-то было
+        taskManager.save(); // чтобы сохранить новый пустой менеджер в файл, если в нём что-то было
     }
 
     @Test

@@ -20,7 +20,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.path = path;
     }
 
-    private void save() {
+    public void save() {
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)) {
             bufferedWriter.write(CSVUtil.FILE_HEADER + "\n");
             for (Task task : tasks.values()) {
