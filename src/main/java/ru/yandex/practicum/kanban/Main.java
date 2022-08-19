@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) {
 
         Path filePath = Path.of("src","main", "resources", "taskManager.csv");
-        TaskManager taskManager = Managers.getFileBacked(filePath);
+        TaskManager taskManager = Managers.getFileBacked(filePath, false);
 
 
         LocalDateTime minStartTime = LocalDateTime.now();
@@ -95,7 +95,7 @@ public class Main {
 //        filePath = Path.of("resources", "taskManager2.csv");
 //        taskManager.clearTasks();
 //        taskManager.clearEpics();
-        TaskManager taskManagerCopy = Managers.restoreFileBacked(filePath);
+        TaskManager taskManagerCopy = Managers.getFileBacked(filePath, true);
         System.out.println("------------------");
         System.out.println("Task manager from file:");
         printAllTasks(taskManagerCopy);

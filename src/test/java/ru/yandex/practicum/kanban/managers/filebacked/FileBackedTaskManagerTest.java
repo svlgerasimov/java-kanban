@@ -2,7 +2,6 @@ package ru.yandex.practicum.kanban.managers.filebacked;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.kanban.managers.TaskManager;
 import ru.yandex.practicum.kanban.managers.TaskManagerTest;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
@@ -19,13 +18,14 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @BeforeEach
     public void beforeEach() {
-        taskManager = new FileBackedTaskManager(filePath);
+        taskManager = new FileBackedTaskManager(filePath.toString());
         taskManager.save(); // чтобы сохранить новый пустой менеджер в файл, если в нём что-то было
     }
 
     @Test
     public void loadEmptyManagerTest() {
-        TaskManager restored = FileBackedTaskManager.loadFromFile(filePath);
+        FileBackedTaskManager restored = new FileBackedTaskManager(filePath.toString());
+        restored.load();
         assertEquals(0, restored.getTasks().size(), "Не пустой список задач");
         assertEquals(0, restored.getEpics().size(), "Не пустой список эпиков");
         assertEquals(0, restored.getSubtasks().size(), "Не пустой список подзадач");
@@ -60,7 +60,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         taskManager.getEpic(epicId2);
         taskManager.getSubtask(subtaskId2);
 
-        TaskManager restoredTaskManager = FileBackedTaskManager.loadFromFile(filePath);
+        FileBackedTaskManager restoredTaskManager = new FileBackedTaskManager(filePath.toString());
+        restoredTaskManager.load();
         assertEquals(taskManager.getTasks(), restoredTaskManager.getTasks(),
                 "Список задач после выгрузки не совпадает");
         assertEquals(taskManager.getSubtasks(), restoredTaskManager.getSubtasks(),
@@ -82,7 +83,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         Subtask subtask = taskManager.addSubtask(new Subtask(0, "", "", TaskStatus.NEW, epicId));
         final int subtaskId = subtask.getId();
 
-        TaskManager restored = FileBackedTaskManager.loadFromFile(filePath);
+        FileBackedTaskManager restored = new FileBackedTaskManager(filePath.toString());
+        restored.load();
         assertEquals(task, restored.getTask(taskId), "Неверно восстановлена задача");
         assertEquals(subtask, restored.getSubtask(subtaskId), "Неверно восстановлена подзадача");
         assertEquals(epic, restored.getEpic(epicId), "Неверно восстановлен эпик");

@@ -10,60 +10,83 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    private final Path path;
+    private final String path;
 
-    public FileBackedTaskManager(Path path) {
+    public FileBackedTaskManager(String path) {
         this.path = path;
     }
 
     public void save() {
-        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path)) {
-            bufferedWriter.write(CSVUtil.FILE_HEADER + "\n");
-            for (Task task : tasks.values()) {
-                bufferedWriter.write(CSVUtil.taskToString(task) + "\n");
-            }
-            // Сначала сохраняем эпики, потом подзадачи.
-            // Иначе при восстановлении подзадачи без эпиков не добавятся
-            for (Epic epic : epics.values()) {
-                bufferedWriter.write(CSVUtil.taskToString(epic) + "\n");
-            }
-            for (Subtask subtask : subtasks.values()) {
-                bufferedWriter.write(CSVUtil.taskToString(subtask) + "\n");
-            }
-            bufferedWriter.write(String.format("%n%s", CSVUtil.historyToString(historyManager)));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(CSVUtil.FILE_HEADER + "\n");
+        for (Task task : tasks.values()) {
+            stringBuilder.append(CSVUtil.taskToString(task)).append("\n");
+        }
+        // Сначала сохраняем эпики, потом подзадачи.
+        // Иначе при восстановлении подзадачи без эпиков не добавятся
+        for (Epic epic : epics.values()) {
+            stringBuilder.append(CSVUtil.taskToString(epic)).append("\n");
+        }
+        for (Subtask subtask : subtasks.values()) {
+            stringBuilder.append(CSVUtil.taskToString(subtask)).append("\n");
+        }
+        stringBuilder.append(String.format("%n%s", CSVUtil.historyToString(historyManager)));
+        saveToSource(stringBuilder.toString());
+
+//        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Path.of(path))) {
+//            bufferedWriter.write(CSVUtil.FILE_HEADER + "\n");
+//            for (Task task : tasks.values()) {
+//                bufferedWriter.write(CSVUtil.taskToString(task) + "\n");
+//            }
+//            // Сначала сохраняем эпики, потом подзадачи.
+//            // Иначе при восстановлении подзадачи без эпиков не добавятся
+//            for (Epic epic : epics.values()) {
+//                bufferedWriter.write(CSVUtil.taskToString(epic) + "\n");
+//            }
+//            for (Subtask subtask : subtasks.values()) {
+//                bufferedWriter.write(CSVUtil.taskToString(subtask) + "\n");
+//            }
+//            bufferedWriter.write(String.format("%n%s", CSVUtil.historyToString(historyManager)));
+//        } catch (IOException e) {
+//            throw new ManagerSaveException("Manager save to file error: " + e.getMessage());
+//        }
+    }
+
+    protected void saveToSource(String content) {
+        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Path.of(path))) {
+            bufferedWriter.write(content);
         } catch (IOException e) {
             throw new ManagerSaveException("Manager save to file error: " + e.getMessage());
         }
     }
 
-    public static FileBackedTaskManager loadFromFile(Path path) {
-        FileBackedTaskManager taskManager = new FileBackedTaskManager(path);
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
+    public void load() {
+        super.clearTasks();
+        super.clearEpics();
+        try (BufferedReader bufferedReader = Files.newBufferedReader(Path.of(path))) {
             bufferedReader.readLine();  // Считываем и игнорируем заголовок
             while (bufferedReader.ready()) {
                 String taskLine = bufferedReader.readLine();
                 if (taskLine.isEmpty()) {
                     break;
                 }
-                taskManager.addTaskFromString(taskLine);
+                addTaskFromString(taskLine);
             }
             String historyLine = bufferedReader.readLine();
             if (historyLine != null) {
-                for (Integer taskId : CSVUtil.historyIdsFromString(historyLine)) {
-                    Task task = taskManager.getAnyTaskById(taskId);
-                    if (task != null) {
-                        taskManager.historyManager.add(task);
-                    }
-                }
+                CSVUtil.historyIdsFromString(historyLine).stream()
+                        .map(this::getAnyTaskById)
+                        .filter(Objects::nonNull)
+                        .forEach(historyManager::add);
             }
         } catch (IOException e) {
             throw new ManagerLoadException("Manager load from file exception: " + e.getMessage());
         }
-        return taskManager;
     }
 
     // Здесь нельзя использовать родительские addTask и т.д., т.к. они подменяют id

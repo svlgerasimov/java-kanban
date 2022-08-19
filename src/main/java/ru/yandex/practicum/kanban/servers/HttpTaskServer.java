@@ -27,7 +27,9 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.*;
 
 public class HttpTaskServer {
@@ -91,11 +93,12 @@ public class HttpTaskServer {
                 .create();
     }
 
+    // Для проверки api внешними средствами
     public static void main(String[] args) {
         HttpTaskServer httpTaskServer;
         try {
-            httpTaskServer = new HttpTaskServer(Path.of("src","main", "resources", "taskManager.csv"),
-                    true);
+            Path filePath = Path.of("src","main", "resources", "taskManager.csv");
+            httpTaskServer = new HttpTaskServer(filePath, true);
             httpTaskServer.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -103,15 +106,16 @@ public class HttpTaskServer {
     }
 
     public HttpTaskServer(Path filePath, boolean restoreTaskManager) throws IOException {
-        if (restoreTaskManager) {
-            try {
-                taskManager = Managers.restoreFileBacked(filePath);
-            } catch (ManagerLoadException e) {
-                taskManager = Managers.getFileBacked(filePath);
-            }
-        } else {
-            taskManager = Managers.getFileBacked(filePath);
-        }
+//        if (restoreTaskManager) {
+//            try {
+//                taskManager = Managers.restoreFileBacked(filePath);
+//            } catch (ManagerLoadException e) {
+//                taskManager = Managers.getFileBacked(filePath);
+//            }
+//        } else {
+//            taskManager = Managers.getFileBacked(filePath);
+//        }
+        taskManager = Managers.getFileBacked(filePath, restoreTaskManager);
 
         InetSocketAddress inetSocketAddress = new InetSocketAddress(PORT);
         httpServer = HttpServer.create();
@@ -131,113 +135,77 @@ public class HttpTaskServer {
     }
 
     private void handleRequest(HttpExchange exchange) throws IOException {
-        String[] pathParts = exchange.getRequestURI().getPath().split("/");
-        Response response;
-        if (!ENDPOINT_BASE.equals(pathParts[1])) { // Проверка, что отвечаем на "/tasks/*", а не "/tasks-что-то-еще/*"
-//            exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
-//            return;
-            response = new Response(RESPONSE_CODE_NOT_FOUND, null);
-        } else if (pathParts.length == 2) {    // /tasks/
-            System.out.printf("Handling /%s/%n", ENDPOINT_BASE);
-            //handlePrioritizedTasks(exchange);
-            response = handleSimpleGetRequest(exchange, taskManager::getPrioritizedTasks);
-//            return;
-        } else if (pathParts.length == 3) {    // /tasks/*/
-            switch (pathParts[2]) {
-                case ENDPOINT_TASK_OPERATIONS:    // /tasks/task/
-                    System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_TASK_OPERATIONS);
-                    response = handleTasks(exchange, Task.class,
-                            taskManager::getTask, taskManager::getTasks,
-                            taskManager::addTask, taskManager::updateTask,
-                            taskManager::removeTask, taskManager::clearTasks);
-                    break;
-                case ENDPOINT_EPIC_OPERATIONS:    // /tasks/epic/
-                    System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_EPIC_OPERATIONS);
-                    response = handleTasks(exchange, Epic.class,
-                            taskManager::getEpic, taskManager::getEpics,
-                            taskManager::addEpic, taskManager::updateEpic,
-                            taskManager::removeEpic, taskManager::clearEpics);
-                    break;
-                case ENDPOINT_SUBTASK_OPERATIONS:    // /tasks/subtask/
-                    System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_SUBTASK_OPERATIONS);
-                    response = handleTasks(exchange, Subtask.class,
-                            taskManager::getSubtask, taskManager::getSubtasks,
-                            taskManager::addSubtask, taskManager::updateSubtask,
-                            taskManager::removeSubtask, taskManager::clearSubtasks);
-                    break;
-                case ENDPOINT_HISTORY:    // /tasks/history/
-                    System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_HISTORY);
-                    //handleHistory(exchange);
-                    response = handleSimpleGetRequest(exchange, taskManager::getHistory);
-                    break;
-                default:
-//                    exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
-                    response = new Response(RESPONSE_CODE_NOT_FOUND, null);
+        try {
+            URI uri = exchange.getRequestURI();
+            String[] pathParts = uri.getPath().split("/");
+
+            Response response;
+            if (!ENDPOINT_BASE.equals(pathParts[1])) { // Проверка, что отвечаем на "/tasks/*", а не "/tasks-что-то-еще/*"
+                response = new Response(RESPONSE_CODE_NOT_FOUND, null);
+            } else if (pathParts.length == 2) {    // /tasks/
+                System.out.printf("Handling /%s/%n", ENDPOINT_BASE);
+                response = handleSimpleGetRequest(exchange, taskManager::getPrioritizedTasks);
+            } else if (pathParts.length == 3) {    // /tasks/*/
+                switch (pathParts[2]) {
+                    case ENDPOINT_TASK_OPERATIONS:    // /tasks/task/
+                        System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_TASK_OPERATIONS);
+                        response = handleTasks(exchange, Task.class,
+                                taskManager::getTask, taskManager::getTasks,
+                                taskManager::addTask, taskManager::updateTask,
+                                taskManager::removeTask, taskManager::clearTasks);
+                        break;
+                    case ENDPOINT_EPIC_OPERATIONS:    // /tasks/epic/
+                        System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_EPIC_OPERATIONS);
+                        response = handleTasks(exchange, Epic.class,
+                                taskManager::getEpic, taskManager::getEpics,
+                                taskManager::addEpic, taskManager::updateEpic,
+                                taskManager::removeEpic, taskManager::clearEpics);
+                        break;
+                    case ENDPOINT_SUBTASK_OPERATIONS:    // /tasks/subtask/
+                        System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_SUBTASK_OPERATIONS);
+                        response = handleTasks(exchange, Subtask.class,
+                                taskManager::getSubtask, taskManager::getSubtasks,
+                                taskManager::addSubtask, taskManager::updateSubtask,
+                                taskManager::removeSubtask, taskManager::clearSubtasks);
+                        break;
+                    case ENDPOINT_HISTORY:    // /tasks/history/
+                        System.out.printf("Handling /%s/%s%n", ENDPOINT_BASE, ENDPOINT_HISTORY);
+                        response = handleSimpleGetRequest(exchange, taskManager::getHistory);
+                        break;
+                    default:
+                        response = new Response(RESPONSE_CODE_NOT_FOUND, null);
+                }
+            } else if (pathParts.length == 4 && ENDPOINT_SUBTASK_OPERATIONS.equals(pathParts[2])
+                    && ENDPOINT_EPIC_SUBTASKS.equals(pathParts[3])) {
+                // /tasks/subtask/epic/
+                System.out.printf("Handling /%s/%s/%s%n",
+                        ENDPOINT_BASE, ENDPOINT_SUBTASK_OPERATIONS, ENDPOINT_EPIC_SUBTASKS);
+                response = handleEpicSubtasks(exchange);
+            } else {
+                response = new Response(RESPONSE_CODE_BAD_REQUEST, null);
             }
-//            return;
-        } else if (pathParts.length == 4 && ENDPOINT_SUBTASK_OPERATIONS.equals(pathParts[2])
-                && ENDPOINT_EPIC_SUBTASKS.equals(pathParts[3])) {
-            // /tasks/subtask/epic/
-            System.out.printf("Handling /%s/%s/%s%n",
-                    ENDPOINT_BASE, ENDPOINT_SUBTASK_OPERATIONS, ENDPOINT_EPIC_SUBTASKS);
-            response = handleEpicSubtasks(exchange);
-//            return;
-        } else {
-            response = new Response(RESPONSE_CODE_BAD_REQUEST, null);
+            response.send(exchange);
+        } finally {
+            exchange.close();
         }
-//        exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
-        response.send(exchange);
     }
 
     private static Response handleSimpleGetRequest(HttpExchange exchange, Supplier<Object> supplier) {
         String requestMethod = exchange.getRequestMethod();
         if (!"GET".equals(requestMethod)) {
-//            exchange.sendResponseHeaders(RESPONSE_CODE_METHOD_NOT_ALLOWED, -1);
             return new Response(RESPONSE_CODE_METHOD_NOT_ALLOWED, null);
         }
         String response = gson.toJson(supplier.get());
-//        exchange.sendResponseHeaders(RESPONSE_CODE_OK, 0);
-//        try (OutputStream os = exchange.getResponseBody()) {
-//            os.write(response.getBytes(DEFAULT_CHARSET));
-//        }
         return new Response(RESPONSE_CODE_OK, response);
     }
 
-//    private void handlePrioritizedTasks(HttpExchange exchange) throws IOException {
-//        String requestMethod = exchange.getRequestMethod();
-//        if (!"GET".equals(requestMethod)) {
-//            exchange.sendResponseHeaders(RESPONSE_CODE_METHOD_NOT_ALLOWED, -1);
-//            return;
-//        }
-//        String response = gson.toJson(taskManager.getPrioritizedTasks());
-//        exchange.sendResponseHeaders(RESPONSE_CODE_OK, 0);
-//        try (OutputStream os = exchange.getResponseBody()) {
-//            os.write(response.getBytes(DEFAULT_CHARSET));
-//        }
-//    }
-//
-//    private void handleHistory(HttpExchange exchange) throws IOException {
-//        String requestMethod = exchange.getRequestMethod();
-//        if (!"GET".equals(requestMethod)) {
-//            exchange.sendResponseHeaders(RESPONSE_CODE_METHOD_NOT_ALLOWED, -1);
-//            return;
-//        }
-//        String response = gson.toJson(taskManager.getHistory());
-//        exchange.sendResponseHeaders(RESPONSE_CODE_OK, 0);
-//        try (OutputStream os = exchange.getResponseBody()) {
-//            os.write(response.getBytes(DEFAULT_CHARSET));
-//        }
-//    }
-
-    private Response handleEpicSubtasks(HttpExchange exchange) throws IOException {
+    private Response handleEpicSubtasks(HttpExchange exchange) {
         String requestMethod = exchange.getRequestMethod();
         if (!"GET".equals(requestMethod)) {
-//            exchange.sendResponseHeaders(RESPONSE_CODE_METHOD_NOT_ALLOWED, -1);
             return new Response(RESPONSE_CODE_METHOD_NOT_ALLOWED, null);
         }
         Integer id = getIdFromRequestUri(exchange.getRequestURI());
         if (id == null) {
-//            exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
             return new Response(RESPONSE_CODE_BAD_REQUEST, null);
         }
         List<Subtask> subtasks = taskManager.getEpicsSubtasks(id);
@@ -245,115 +213,87 @@ public class HttpTaskServer {
             return new Response(RESPONSE_CODE_NOT_FOUND, null);
         }
         String response = gson.toJson(subtasks);
-//        exchange.sendResponseHeaders(RESPONSE_CODE_OK, 0);
-//        try (OutputStream os = exchange.getResponseBody()) {
-//            os.write(response.getBytes(DEFAULT_CHARSET));
-//        }
         return new Response(RESPONSE_CODE_OK, response);
     }
 
     private static  <T extends Task> Response handleTasks(HttpExchange exchange, Class<T> taskClass,
                                               IntFunction<T> taskGetter, Supplier<List<T>> allTasksGetter,
                                               UnaryOperator<T> taskAdder, Predicate<T> taskUpdater,
-                                              IntPredicate taskRemover, Runnable taskClearer) throws IOException {
+                                              IntPredicate taskRemover, Action taskClearer) throws IOException {
         String requestMethod = exchange.getRequestMethod();
         String requestQuery = exchange.getRequestURI().getQuery();
-//        String response;
         switch (requestMethod) {
             case "GET":
                 if (requestQuery == null) { // Нет строки запроса
-//                    response = gson.toJson(allTasksGetter.get());
-//                    exchange.sendResponseHeaders(RESPONSE_CODE_OK, 0);
                     return new Response(RESPONSE_CODE_OK, gson.toJson(allTasksGetter.get()));
                 } else {
                     Integer id = getIdFromRequestQuery(requestQuery);
                     if (id == null) {
-//                        exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
                         return new Response(RESPONSE_CODE_BAD_REQUEST, null);
                     }
                     T task = taskGetter.apply(id);
                     if (task == null) {
-//                        exchange.sendResponseHeaders(RESPONSE_CODE_NOT_FOUND, -1);
                         return new Response(RESPONSE_CODE_NOT_FOUND, null);
                     }
-//                    response = gson.toJson(task);
-//                    exchange.sendResponseHeaders(RESPONSE_CODE_OK, 0);
                     return new Response(RESPONSE_CODE_OK, gson.toJson(task));
                 }
-//                break;
             case "POST":
-                try (InputStream inputStream = exchange.getRequestBody()) {
-//                    byte[] bytes = inputStream.readAllBytes();
-                    String requestBody = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
+                String requestBody = new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
 
-                    // Чтобы различать запросы на добавление и обновление задач, будем считать,
-                    // что при добавлении клиент не указывает id задачи
-                    JsonElement jsonElement = JsonParser.parseString(requestBody);
-                    if (!jsonElement.isJsonObject()) {
-//                        exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
-                        return new Response(RESPONSE_CODE_BAD_REQUEST, null);
-                    }
-                    T task = gson.fromJson(requestBody, taskClass);
-                    if (task == null) { // корректная десериализация не удалась
-//                        exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
-                        return new Response(RESPONSE_CODE_BAD_REQUEST, null);
-                    }
-
-                    if (jsonElement.getAsJsonObject().get("id") == null) {
-                        // добавление новой задачи
-                        task = taskAdder.apply(task);
-                        if (task == null) {
-//                            exchange.sendResponseHeaders(RESPONSE_CODE_NOT_ACCEPTABLE, -1);
-                            return new Response(RESPONSE_CODE_NOT_ACCEPTABLE, null);
-                        }
-//                        response = gson.toJson(task);
-//                        exchange.sendResponseHeaders(RESPONSE_CODE_OK, 0);
-                        return new Response(RESPONSE_CODE_OK, gson.toJson(task));
-                    } else {
-                        // обновление задачи
-//                        exchange.sendResponseHeaders(
-//                                taskUpdater.test(task) ? RESPONSE_CODE_OK : RESPONSE_CODE_NOT_ACCEPTABLE,
-//                                -1);
-                        return new Response(
-                                taskUpdater.test(task) ? RESPONSE_CODE_OK : RESPONSE_CODE_NOT_ACCEPTABLE,
-                                null);
-                    }
+                // Чтобы различать запросы на добавление и обновление задач, будем считать,
+                // что при добавлении клиент не указывает id задачи
+                JsonElement jsonElement = JsonParser.parseString(requestBody);
+                if (!jsonElement.isJsonObject()) {
+                    return new Response(RESPONSE_CODE_BAD_REQUEST, null);
                 }
-//                break;
+                T task = gson.fromJson(requestBody, taskClass);
+                if (task == null) { // корректная десериализация не удалась
+                    return new Response(RESPONSE_CODE_BAD_REQUEST, null);
+                }
+
+                if (jsonElement.getAsJsonObject().get("id") == null) {
+                    // добавление новой задачи
+                    task = taskAdder.apply(task);
+                    if (task == null) {
+                        return new Response(RESPONSE_CODE_NOT_ACCEPTABLE, null);
+                    }
+                    return new Response(RESPONSE_CODE_OK, gson.toJson(task));
+                } else {
+                    // обновление задачи
+                    return new Response(
+                            taskUpdater.test(task) ? RESPONSE_CODE_OK : RESPONSE_CODE_NOT_ACCEPTABLE,
+                            null);
+                }
             case "DELETE":
                 if (requestQuery == null) { // Нет строки запроса
                     taskClearer.run();
-//                    exchange.sendResponseHeaders(RESPONSE_CODE_OK, -1);
                     return new Response(RESPONSE_CODE_OK, null);
                 } else {
                     Integer id = getIdFromRequestQuery(requestQuery);
                     if (id == null) {
-//                        exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
                         return new Response(RESPONSE_CODE_BAD_REQUEST, null);
                     }
-//                    exchange.sendResponseHeaders(
-//                            taskRemover.test(id) ? RESPONSE_CODE_OK : RESPONSE_CODE_NOT_ACCEPTABLE, -1);
                     return new Response(
                             taskRemover.test(id) ? RESPONSE_CODE_OK : RESPONSE_CODE_NOT_ACCEPTABLE,
                             null);
                 }
-//                return;
             default:
-//                exchange.sendResponseHeaders(RESPONSE_CODE_METHOD_NOT_ALLOWED, -1);
                 return new Response(RESPONSE_CODE_METHOD_NOT_ALLOWED, null);
         }
-//        try (OutputStream os = exchange.getResponseBody()) {
-//            os.write(response.getBytes(DEFAULT_CHARSET));
-//        }
     }
 
     private static Integer getIdFromRequestQuery(String requestQuery) {
-        String[] queryParts = requestQuery.split("[&=]");
-        if (queryParts.length < 2 || !"id".equals(queryParts[0])) {
+        // На случай если будет несколько аргументов
+        Optional<String> id = Arrays.stream(requestQuery.split("&"))
+                .map(s -> s.split("="))
+                .filter(words -> words.length == 2 && "id".equals(words[0]))
+                .map(words -> words[1])
+                .findFirst();
+        if (id.isEmpty()) {
             return null;
         }
         try {
-            return Integer.valueOf(queryParts[1]);
+            return Integer.valueOf(id.get());
         } catch (NumberFormatException e) {
             return null;
         }
@@ -364,7 +304,10 @@ public class HttpTaskServer {
         return requestQuery == null ? null : getIdFromRequestQuery(requestQuery);
     }
 
-
+    @FunctionalInterface
+    private interface Action {
+        void run();
+    }
 
     private static class Response {
         private final int code;
@@ -376,14 +319,10 @@ public class HttpTaskServer {
         }
 
         public void send(HttpExchange exchange) throws IOException {
-//            exchange.getRequestBody().close();
-            exchange.sendResponseHeaders(code, /*body == null ? -1 :*/ 0);
+            exchange.sendResponseHeaders(code, 0);
             if (body != null) {
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(body.getBytes(DEFAULT_CHARSET));
-                }
+                exchange.getResponseBody().write(body.getBytes(DEFAULT_CHARSET));
             }
-            exchange.close();
         }
     }
 }

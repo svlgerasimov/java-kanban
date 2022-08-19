@@ -9,23 +9,18 @@ import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.Format;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,7 +35,7 @@ public class HttpTaskServerTest {
     private static final String ID_QUERY_FORMAT = "id=%d";
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-    private static final Path FILE_PATH = Path.of("src","test", "resources", "taskManager.csv");;
+    private static final Path FILE_PATH = Path.of("src","test", "resources", "taskManager.csv");
     private final static LocalDateTime DEFAULT_TIME =
             LocalDateTime.of(2022, Month.JANUARY, 1, 1, 1, 0);
     private final static int REQUEST_TIMEOUT_SECONDS = 1;
@@ -75,11 +70,6 @@ public class HttpTaskServerTest {
     void setUp() throws IOException {
         httpTaskServer = new HttpTaskServer(FILE_PATH, false);
         httpTaskServer.start();
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
     }
 
     @AfterEach
@@ -114,10 +104,6 @@ public class HttpTaskServerTest {
         }
         return "{" + String.join(",", fields) + "}";
     }
-
-//    private static String createRequestQuery(int id) {
-//        return String
-//    }
 
     private static HttpResponse<String> postRequest(String endPoint, String body)
             throws IOException, InterruptedException {
