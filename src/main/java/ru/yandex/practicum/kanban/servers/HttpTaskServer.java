@@ -237,10 +237,14 @@ public class HttpTaskServer {
         }
         Integer id = getIdFromRequestUri(exchange.getRequestURI());
         if (id == null) {
-            exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
+//            exchange.sendResponseHeaders(RESPONSE_CODE_BAD_REQUEST, -1);
             return new Response(RESPONSE_CODE_BAD_REQUEST, null);
         }
-        String response = gson.toJson(taskManager.getEpicsSubtasks(id));
+        List<Subtask> subtasks = taskManager.getEpicsSubtasks(id);
+        if (subtasks == null) {
+            return new Response(RESPONSE_CODE_NOT_FOUND, null);
+        }
+        String response = gson.toJson(subtasks);
 //        exchange.sendResponseHeaders(RESPONSE_CODE_OK, 0);
 //        try (OutputStream os = exchange.getResponseBody()) {
 //            os.write(response.getBytes(DEFAULT_CHARSET));

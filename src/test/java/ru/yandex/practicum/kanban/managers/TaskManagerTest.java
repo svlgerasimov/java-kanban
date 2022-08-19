@@ -363,9 +363,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getSubtasksOfAbsentEpicTest() {
-        assertNotNull(taskManager.getEpicsSubtasks(1), "Не возвращается список подзадач");
-        assertEquals(0, taskManager.getEpicsSubtasks(1).size(),
-                "Возвращается не пустой список");
+        assertNull(taskManager.getEpicsSubtasks(1));
     }
 
     @Test
@@ -373,7 +371,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = taskManager.addEpic(new Epic(0, "name", "description"));
         final int id = epic.getId();
         taskManager.addSubtask(new Subtask(0, "name1", "description1", TaskStatus.NEW, id));
-        assertEquals(0, taskManager.getEpicsSubtasks(id + 1).size());
+        assertNull(taskManager.getEpicsSubtasks(id + 1));
     }
 
     @Test
