@@ -1,6 +1,5 @@
 package ru.yandex.practicum.kanban.managers.backed;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.kanban.managers.TaskManagerTest;
 import ru.yandex.practicum.kanban.managers.backed.filebacked.FileBackedTaskManager;
@@ -8,8 +7,6 @@ import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
-
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 

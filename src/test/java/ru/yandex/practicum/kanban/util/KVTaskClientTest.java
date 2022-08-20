@@ -14,7 +14,7 @@ class KVTaskClientTest {
     private KVTaskClient kvTaskClient;
 
     @BeforeEach
-    void setUp() throws IOException, InterruptedException {
+    void setUp() throws IOException {
         kvServer = new KVServer();
         kvServer.start();
         kvTaskClient = new KVTaskClient("http://localhost:8078");

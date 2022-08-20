@@ -1,7 +1,6 @@
 package ru.yandex.practicum.kanban.util.json.adapters;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
@@ -41,34 +40,4 @@ class TaskDeserializerTest {
         assertEquals(epic, gson.fromJson(epicJson, Epic.class));
         assertEquals(subtask, gson.fromJson(subtaskJson, Subtask.class));
     }
-
-//    @Test
-//    public void polymorphDeserializationTest() {
-//        Gson gson = GsonBuilders.getBuilderPolymorphTaskTypes().create();
-//
-//        Task task = new Task(1, "task name", "task description", TaskStatus.IN_PROGRESS,
-//                DEFAULT_TIME, 10);
-//        Epic epic = new Epic(2, "epic name", "epic description");
-//        Subtask subtask = new Subtask(3, "subtask name", "subtask description", TaskStatus.DONE,
-//                epic.getId(), DEFAULT_TIME, 20);
-//
-//        String taskJson = gson.toJson(task);
-//        String epicJson = gson.toJson(epic);
-//        String subtaskJson = gson.toJson(subtask);
-//
-//        System.out.println(taskJson);
-//        System.out.println(epicJson);
-//        System.out.println(subtaskJson);
-//
-//        assertEquals(task, gson.fromJson(taskJson, Task.class));
-//        assertEquals(epic, gson.fromJson(epicJson, Epic.class));
-//        assertEquals(epic, gson.fromJson(epicJson, Task.class));
-//        assertEquals(subtask, gson.fromJson(subtaskJson, Subtask.class));
-//        assertEquals(subtask, gson.fromJson(subtaskJson, Task.class));
-//
-//        Task[] polymorphTypes = new Task[] {task, epic, subtask};
-//        String polymorphTypesJson = gson.toJson(polymorphTypes);
-//        System.out.println(polymorphTypesJson);
-//        assertArrayEquals(polymorphTypes, gson.fromJson(polymorphTypesJson, Task[].class));
-//    }
 }
