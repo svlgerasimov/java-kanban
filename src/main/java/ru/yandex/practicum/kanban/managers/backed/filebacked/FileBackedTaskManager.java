@@ -1,16 +1,20 @@
-package ru.yandex.practicum.kanban.managers.filebacked;
+package ru.yandex.practicum.kanban.managers.backed.filebacked;
 
+import ru.yandex.practicum.kanban.managers.backed.ManagerLoadException;
+import ru.yandex.practicum.kanban.managers.backed.ManagerSaveException;
 import ru.yandex.practicum.kanban.managers.inmemory.InMemoryTaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -22,6 +26,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public void save() {
+        String serialized = serialize();
+        saveToTarget(serialized);
+    }
+
+    protected String serialize() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(CSVUtil.FILE_HEADER + "\n");
         for (Task task : tasks.values()) {
@@ -36,62 +45,59 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             stringBuilder.append(CSVUtil.taskToString(subtask)).append("\n");
         }
         stringBuilder.append(String.format("%n%s", CSVUtil.historyToString(historyManager)));
-        saveToSource(stringBuilder.toString());
-
-//        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Path.of(path))) {
-//            bufferedWriter.write(CSVUtil.FILE_HEADER + "\n");
-//            for (Task task : tasks.values()) {
-//                bufferedWriter.write(CSVUtil.taskToString(task) + "\n");
-//            }
-//            // Сначала сохраняем эпики, потом подзадачи.
-//            // Иначе при восстановлении подзадачи без эпиков не добавятся
-//            for (Epic epic : epics.values()) {
-//                bufferedWriter.write(CSVUtil.taskToString(epic) + "\n");
-//            }
-//            for (Subtask subtask : subtasks.values()) {
-//                bufferedWriter.write(CSVUtil.taskToString(subtask) + "\n");
-//            }
-//            bufferedWriter.write(String.format("%n%s", CSVUtil.historyToString(historyManager)));
-//        } catch (IOException e) {
-//            throw new ManagerSaveException("Manager save to file error: " + e.getMessage());
-//        }
+        return stringBuilder.toString();
     }
 
-    protected void saveToSource(String content) {
+    protected void saveToTarget(String content) {
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Path.of(path))) {
             bufferedWriter.write(content);
         } catch (IOException e) {
-            throw new ManagerSaveException("Manager save to file error: " + e.getMessage());
+            throw new ManagerSaveException("Manager save to file exception: " + e.getMessage());
         }
     }
 
     public void load() {
+        String serialized = loadFromTarget();
         super.clearTasks();
         super.clearEpics();
-        try (BufferedReader bufferedReader = Files.newBufferedReader(Path.of(path))) {
-            bufferedReader.readLine();  // Считываем и игнорируем заголовок
-            while (bufferedReader.ready()) {
-                String taskLine = bufferedReader.readLine();
-                if (taskLine.isEmpty()) {
-                    break;
-                }
-                addTaskFromString(taskLine);
+        deserialize(serialized);
+    }
+
+    protected void deserialize(String serialized) {
+        Iterator<String> linesIterator = Arrays.stream(serialized.split("\r?\n")).iterator();
+        if (linesIterator.hasNext()) {
+            linesIterator.next();  // Считываем и игнорируем заголовок
+        }
+        while (linesIterator.hasNext()) {
+            String taskLine = linesIterator.next();
+            if (taskLine.isEmpty()) {
+                break;
             }
-            String historyLine = bufferedReader.readLine();
-            if (historyLine != null) {
-                CSVUtil.historyIdsFromString(historyLine).stream()
-                        .map(this::getAnyTaskById)
-                        .filter(Objects::nonNull)
-                        .forEach(historyManager::add);
-            }
+            Task task = CSVUtil.taskFromString(taskLine);
+            addDeserializedTask(task);
+        }
+        if (linesIterator.hasNext()) {
+            String historyLine = linesIterator.next();
+            deserializeHistory(CSVUtil.historyIdsFromString(historyLine).stream());
+        }
+    }
+
+    protected void deserializeHistory(Stream<Integer> ids) {
+        ids.map(this::getAnyTaskById)
+                .filter(Objects::nonNull)
+                .forEach(historyManager::add);
+    }
+
+    protected String loadFromTarget() {
+        try {
+            return Files.readString(Path.of(path));
         } catch (IOException e) {
             throw new ManagerLoadException("Manager load from file exception: " + e.getMessage());
         }
     }
 
     // Здесь нельзя использовать родительские addTask и т.д., т.к. они подменяют id
-    private void addTaskFromString(String line) {
-        Task task = CSVUtil.taskFromString(line);
+    protected void addDeserializedTask(Task task) {
         switch (task.getType()) {
             case TASK:
                 if (timeManager.validateTask(task)) {

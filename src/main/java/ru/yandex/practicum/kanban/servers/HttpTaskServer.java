@@ -1,32 +1,21 @@
 package ru.yandex.practicum.kanban.servers;
 
 import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import ru.yandex.practicum.kanban.managers.Managers;
 import ru.yandex.practicum.kanban.managers.TaskManager;
-import ru.yandex.practicum.kanban.managers.filebacked.FileBackedTaskManager;
-import ru.yandex.practicum.kanban.managers.filebacked.ManagerLoadException;
-import ru.yandex.practicum.kanban.servers.json.adapters.EpicDeserializer;
-import ru.yandex.practicum.kanban.servers.json.adapters.SubtaskDeserializer;
-import ru.yandex.practicum.kanban.servers.json.adapters.TaskDeserializer;
+import ru.yandex.practicum.kanban.util.json.GsonBuilders;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +24,6 @@ import java.util.function.*;
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public static final int RESPONSE_CODE_OK = 200;
     public static final int RESPONSE_CODE_BAD_REQUEST = 400;
@@ -53,44 +41,10 @@ public class HttpTaskServer {
     private static final Gson gson;
 
     private final HttpServer httpServer;
-    private TaskManager taskManager;
+    private final TaskManager taskManager;
 
     static {
-        gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new TypeAdapter<LocalDateTime>() {
-                    @Override
-                    public void write(JsonWriter jsonWriter, LocalDateTime time) throws IOException {
-                        jsonWriter.value(time == null ? null : time.format(DATE_TIME_FORMATTER));
-                    }
-
-                    @Override
-                    public LocalDateTime read(JsonReader jsonReader) throws IOException {
-                        try {
-                            return LocalDateTime.parse(jsonReader.nextString(), DATE_TIME_FORMATTER);
-                        } catch (DateTimeParseException e) {
-                            throw new JsonParseException("Incorrect DateTime format");
-                        }
-                    }
-                })
-                .registerTypeAdapter(Task.class, new TaskDeserializer<>() {
-                    @Override
-                    protected Task createInstance() {
-                        return new Task(id, name, description, status, startTime, duration);
-                    }
-                })
-                .registerTypeAdapter(Epic.class, new EpicDeserializer<>() {
-                    @Override
-                    protected Epic createInstance() {
-                        return new Epic(id, name, description);
-                    }
-                })
-                .registerTypeAdapter(Subtask.class, new SubtaskDeserializer<>() {
-                    @Override
-                    protected Subtask createInstance() {
-                        return new Subtask(id, name, description, status, epicId, startTime, duration);
-                    }
-                })
-                .create();
+        gson = GsonBuilders.getBuilderSeparateTaskTypes().create();
     }
 
     // Для проверки api внешними средствами
@@ -106,15 +60,6 @@ public class HttpTaskServer {
     }
 
     public HttpTaskServer(Path filePath, boolean restoreTaskManager) throws IOException {
-//        if (restoreTaskManager) {
-//            try {
-//                taskManager = Managers.restoreFileBacked(filePath);
-//            } catch (ManagerLoadException e) {
-//                taskManager = Managers.getFileBacked(filePath);
-//            }
-//        } else {
-//            taskManager = Managers.getFileBacked(filePath);
-//        }
         taskManager = Managers.getFileBacked(filePath, restoreTaskManager);
 
         InetSocketAddress inetSocketAddress = new InetSocketAddress(PORT);

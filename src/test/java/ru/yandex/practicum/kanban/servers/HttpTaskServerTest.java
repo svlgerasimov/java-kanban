@@ -8,6 +8,7 @@ import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
+import ru.yandex.practicum.kanban.util.json.GsonBuilders;
 
 import java.io.IOException;
 import java.net.URI;
@@ -47,19 +48,7 @@ public class HttpTaskServerTest {
     @BeforeAll
     static void beforeAll() {
         client = HttpClient.newHttpClient();
-        gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new TypeAdapter<LocalDateTime>() {
-                    @Override
-                    public void write(JsonWriter jsonWriter, LocalDateTime time) throws IOException {
-                        jsonWriter.value(time == null ? null : time.format(DATE_TIME_FORMATTER));
-                    }
-
-                    @Override
-                    public LocalDateTime read(JsonReader jsonReader) throws IOException {
-                        return LocalDateTime.parse(jsonReader.nextString(), DATE_TIME_FORMATTER);
-                    }
-                })
-                .create();
+        gson = GsonBuilders.getBuilderNoTaskTypes().create();
     }
 
     @AfterAll

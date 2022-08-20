@@ -1,9 +1,10 @@
 package ru.yandex.practicum.kanban.managers;
 
-import ru.yandex.practicum.kanban.managers.filebacked.FileBackedTaskManager;
-import ru.yandex.practicum.kanban.managers.filebacked.ManagerLoadException;
+import ru.yandex.practicum.kanban.managers.backed.filebacked.FileBackedTaskManager;
+import ru.yandex.practicum.kanban.managers.backed.ManagerLoadException;
+import ru.yandex.practicum.kanban.managers.backed.http.HttpTaskManager;
 import ru.yandex.practicum.kanban.managers.inmemory.InMemoryHistoryManager;
-import ru.yandex.practicum.kanban.managers.inmemory.InMemoryTaskManager;
+import ru.yandex.practicum.kanban.util.KVServer;
 
 import java.nio.file.Path;
 
@@ -13,7 +14,7 @@ public final class Managers {
     }
 
     public static TaskManager getDefault() {
-        return new InMemoryTaskManager();
+        return new HttpTaskManager("http://localhost:" + KVServer.PORT);
     }
 
     public static TaskManager getFileBacked(Path path, boolean load) {
@@ -30,9 +31,19 @@ public final class Managers {
         return fileBackedTaskManager;
     }
 
-//    public static TaskManager restoreFileBacked(String path) {
-//        return FileBackedTaskManager.loadFromFile(path);
-//    }
+    public static TaskManager getHttp(String uri, boolean load) {
+        HttpTaskManager httpTaskManager = new HttpTaskManager(uri);
+        if (load) {
+            try {
+                httpTaskManager.load();
+            } catch (ManagerLoadException e) {
+                return httpTaskManager;
+            }
+        } else {
+            httpTaskManager.save();
+        }
+        return httpTaskManager;
+    }
 
     public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();

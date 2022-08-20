@@ -1,10 +1,17 @@
 id,type,name,status,description,start time,duration,epic
-0,TASK,Задача 1,NEW,Задача 1,19.08.2022 18:37,10,
+0,TASK,Задача 1,NEW,Задача 1,20.08.2022 18:09,10,
 1,TASK,Задача 2,DONE,Задача 2,,0,
-2,EPIC,Эпик 1 updated,IN_PROGRESS,Эпик с 3 подзадачами,19.08.2022 19:02,55,
+2,EPIC,Эпик 1 updated,IN_PROGRESS,Эпик с 3 подзадачами,20.08.2022 18:34,55,
 3,EPIC,Эпик 2,NEW,Эпик без подзадач,,0,
+7,EPIC,,NEW,,,0,
+8,EPIC,,NEW,,,0,
+9,EPIC,,NEW,,,0,
 4,SUBTASK,Подзадача 1,IN_PROGRESS,Подзадача 1,,0,2
-5,SUBTASK,Подзадача 2,IN_PROGRESS,Подзадача 2,19.08.2022 19:02,25,2
-6,SUBTASK,Подзадача 3,NEW,Подзадача 3,19.08.2022 19:37,30,2
+5,SUBTASK,Подзадача 2,IN_PROGRESS,Подзадача 2,20.08.2022 18:34,25,2
+6,SUBTASK,Подзадача 3,NEW,Подзадача 3,20.08.2022 19:09,30,2
+10,SUBTASK,,NEW,,,0,9
+11,SUBTASK,,NEW,,,0,9
+12,SUBTASK,,NEW,,,0,9
+13,SUBTASK,,NEW,,,0,9
 
-0,5,4,2,1,6,3
+0,5,4,2,1,6,3,9

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.kanban.servers.json.adapters;
+package ru.yandex.practicum.kanban.util.json.adapters;
 
 import com.google.gson.*;
 import ru.yandex.practicum.kanban.tasks.Task;

@@ -6,7 +6,9 @@ import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
+import ru.yandex.practicum.kanban.util.KVServer;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,9 +17,18 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Path filePath = Path.of("src","main", "resources", "taskManager.csv");
-        TaskManager taskManager = Managers.getFileBacked(filePath, false);
+//        Path filePath = Path.of("src","main", "resources", "taskManager.csv");
+//        TaskManager taskManager = Managers.getFileBacked(filePath, false);
 
+        KVServer kvServer;
+        try {
+            kvServer = new KVServer();
+        } catch (IOException e) {
+            System.out.println("Failed to start KVServer");
+            return;
+        }
+        kvServer.start();
+        TaskManager taskManager = Managers.getDefault();
 
         LocalDateTime minStartTime = LocalDateTime.now();
 
@@ -95,12 +106,14 @@ public class Main {
 //        filePath = Path.of("resources", "taskManager2.csv");
 //        taskManager.clearTasks();
 //        taskManager.clearEpics();
-        TaskManager taskManagerCopy = Managers.getFileBacked(filePath, true);
+        TaskManager taskManagerCopy = Managers.getHttp("http://localhost:" + KVServer.PORT, true);
         System.out.println("------------------");
         System.out.println("Task manager from file:");
         printAllTasks(taskManagerCopy);
         printHistory(taskManagerCopy);
         printPrioritizedTasks(taskManagerCopy);
+
+        kvServer.stop(0);
     }
 
     private static void printAllTasks(TaskManager taskManager) {
