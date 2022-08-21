@@ -25,6 +25,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.path = path;
     }
 
+    public FileBackedTaskManager(String path, boolean loadAtStart) {
+        this(path);
+        if (loadAtStart) {
+            load();
+        }
+    }
+
     public void save() {
         String serialized = serialize();
         saveToTarget(serialized);

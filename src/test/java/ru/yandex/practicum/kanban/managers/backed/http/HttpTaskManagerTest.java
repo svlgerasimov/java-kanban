@@ -37,8 +37,8 @@ public class HttpTaskManagerTest extends BackedTaskManagerTest {
     }
 
     @Override
-    protected FileBackedTaskManager createNewManagerOfSamePath() {
-        return new HttpTaskManager(kvServerUri);
+    protected FileBackedTaskManager loadNewManager() {
+        return new HttpTaskManager(kvServerUri, true);
     }
 
     @Test

@@ -10,8 +10,8 @@ public class FileBackedTaskManagerTest extends BackedTaskManagerTest {
     private final Path filePath = Path.of("src","test", "resources", "taskManager.csv");
 
     @Override
-    protected FileBackedTaskManager createNewManagerOfSamePath() {
-        return new FileBackedTaskManager(filePath.toString());
+    protected FileBackedTaskManager loadNewManager() {
+        return new FileBackedTaskManager(filePath.toString(), true);
     }
 
     @BeforeEach

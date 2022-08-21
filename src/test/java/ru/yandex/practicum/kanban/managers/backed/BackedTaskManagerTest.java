@@ -12,12 +12,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class BackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
-    abstract protected FileBackedTaskManager createNewManagerOfSamePath();
+    abstract protected FileBackedTaskManager loadNewManager();
 
     @Test
     public void loadEmptyManagerTest() {
-        FileBackedTaskManager restored = createNewManagerOfSamePath();
-        restored.load();
+        FileBackedTaskManager restored = loadNewManager();
+//        restored.load();
         assertEquals(0, restored.getTasks().size(), "Не пустой список задач");
         assertEquals(0, restored.getEpics().size(), "Не пустой список эпиков");
         assertEquals(0, restored.getSubtasks().size(), "Не пустой список подзадач");
@@ -52,8 +52,8 @@ public abstract class BackedTaskManagerTest extends TaskManagerTest<FileBackedTa
         taskManager.getEpic(epicId2);
         taskManager.getSubtask(subtaskId2);
 
-        FileBackedTaskManager restoredTaskManager = createNewManagerOfSamePath();
-        restoredTaskManager.load();
+        FileBackedTaskManager restoredTaskManager = loadNewManager();
+//        restoredTaskManager.load();
         assertEquals(taskManager.getTasks(), restoredTaskManager.getTasks(),
                 "Список задач после выгрузки не совпадает");
         assertEquals(taskManager.getSubtasks(), restoredTaskManager.getSubtasks(),
@@ -75,8 +75,8 @@ public abstract class BackedTaskManagerTest extends TaskManagerTest<FileBackedTa
         Subtask subtask = taskManager.addSubtask(new Subtask(0, "", "", TaskStatus.NEW, epicId));
         final int subtaskId = subtask.getId();
 
-        FileBackedTaskManager restored = createNewManagerOfSamePath();
-        restored.load();
+        FileBackedTaskManager restored = loadNewManager();
+//        restored.load();
         assertEquals(task, restored.getTask(taskId), "Неверно восстановлена задача");
         assertEquals(subtask, restored.getSubtask(subtaskId), "Неверно восстановлена подзадача");
         assertEquals(epic, restored.getEpic(epicId), "Неверно восстановлен эпик");

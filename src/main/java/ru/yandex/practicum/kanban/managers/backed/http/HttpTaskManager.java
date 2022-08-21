@@ -20,10 +20,18 @@ public class HttpTaskManager extends FileBackedTaskManager {
     private final String storageKey = "1";
     private final Gson gson;
 
+    // Прежде чем загружать состояние, нужно подготовить клиент. Поэтому нельзя использовать super(String, boolean).
     public HttpTaskManager(String serverUrl) {
         super(serverUrl);
         taskClient = new KVTaskClient(serverUrl);
         gson = GsonBuilders.getBuilderSeparateTaskTypes().create();
+    }
+
+    public HttpTaskManager(String serverUrl, boolean loadAtStart) {
+        this(serverUrl);
+        if (loadAtStart) {
+            load();
+        }
     }
 
     @Override

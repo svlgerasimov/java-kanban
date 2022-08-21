@@ -14,35 +14,37 @@ public final class Managers {
     }
 
     public static TaskManager getDefault() {
-        return new HttpTaskManager("http://localhost:" + KVServer.PORT);
+        return new HttpTaskManager("http://localhost:" + KVServer.PORT, true);
     }
 
     public static TaskManager getFileBacked(Path path, boolean load) {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(path.toString());
-        if (load) {
-            try {
-                fileBackedTaskManager.load();
-            } catch (ManagerLoadException e) {
-                return fileBackedTaskManager;
-            }
-        } else {
-            fileBackedTaskManager.save();
-        }
-        return fileBackedTaskManager;
+        return new FileBackedTaskManager(path.toString(), load);
+//        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(path.toString(), load);
+//        if (load) {
+//            try {
+//                fileBackedTaskManager.load();
+//            } catch (ManagerLoadException e) {
+//                return fileBackedTaskManager;
+//            }
+//        } else {
+//            fileBackedTaskManager.save();
+//        }
+//        return fileBackedTaskManager;
     }
 
     public static TaskManager getHttp(String uri, boolean load) {
-        HttpTaskManager httpTaskManager = new HttpTaskManager(uri);
-        if (load) {
-            try {
-                httpTaskManager.load();
-            } catch (ManagerLoadException e) {
-                return httpTaskManager;
-            }
-        } else {
-            httpTaskManager.save();
-        }
-        return httpTaskManager;
+        return new HttpTaskManager(uri, load);
+//        HttpTaskManager httpTaskManager = new HttpTaskManager(uri);
+//        if (load) {
+//            try {
+//                httpTaskManager.load();
+//            } catch (ManagerLoadException e) {
+//                return httpTaskManager;
+//            }
+//        } else {
+//            httpTaskManager.save();
+//        }
+//        return httpTaskManager;
     }
 
     public static HistoryManager getDefaultHistory() {
