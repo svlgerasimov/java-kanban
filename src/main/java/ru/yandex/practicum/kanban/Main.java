@@ -6,10 +6,9 @@ import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
-import ru.yandex.practicum.kanban.util.KVServer;
+import ru.yandex.practicum.kanban.util.kvstorage.KVServer;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,6 +19,7 @@ public class Main {
 //        Path filePath = Path.of("src","main", "resources", "taskManager.csv");
 //        TaskManager taskManager = Managers.getFileBacked(filePath, false);
 
+
         KVServer kvServer;
         try {
             kvServer = new KVServer();
@@ -27,61 +27,64 @@ public class Main {
             System.out.println("Failed to start KVServer");
             return;
         }
-        kvServer.start();
-        TaskManager taskManager = Managers.getDefault();
 
-        LocalDateTime minStartTime = LocalDateTime.now();
+        // Если в вывалится исключение, сервер сам не остановится
+        try {
+            kvServer.start();
+            TaskManager taskManager = Managers.getDefault();
 
-        int taskId1 = taskManager.addTask(new Task(0,
-                "Задача 1", "Задача 1", TaskStatus.NEW, minStartTime, 10)).getId();
-        int taskId2 = taskManager.addTask(new Task(0,
-                "Задача 2", "Задача 2", TaskStatus.DONE)).getId();
-        int epicId1 = taskManager.addEpic(new Epic(0,
-                "Эпик 1", "Эпик с 3 подзадачами")).getId();
-        int epicId2 = taskManager.addEpic(new Epic(0,
-                "Эпик 2", "Эпик без подзадач")).getId();
-        int subtaskId1 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 1", "Подзадача 1", TaskStatus.NEW, epicId1)).getId();
-        int subtaskId2 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 2", "Подзадача 2", TaskStatus.NEW, epicId1,
-                minStartTime.plusMinutes(20), 20)).getId();
-        int subtaskId3 = taskManager.addSubtask(new Subtask(0,
-                "Подзадача 3", "Подзадача 3", TaskStatus.NEW, epicId1,
-                minStartTime.plusMinutes(60), 30)).getId();
-        taskManager.addTask(new Task(0, "", "", TaskStatus.NEW, minStartTime, 20));
+            LocalDateTime minStartTime = LocalDateTime.now();
 
-        printAllTasks(taskManager);
-        printHistory(taskManager);
+            int taskId1 = taskManager.addTask(new Task(0,
+                    "Задача 1", "Задача 1", TaskStatus.NEW, minStartTime, 10)).getId();
+            int taskId2 = taskManager.addTask(new Task(0,
+                    "Задача 2", "Задача 2", TaskStatus.DONE)).getId();
+            int epicId1 = taskManager.addEpic(new Epic(0,
+                    "Эпик 1", "Эпик с 3 подзадачами")).getId();
+            int epicId2 = taskManager.addEpic(new Epic(0,
+                    "Эпик 2", "Эпик без подзадач")).getId();
+            int subtaskId1 = taskManager.addSubtask(new Subtask(0,
+                    "Подзадача 1", "Подзадача 1", TaskStatus.NEW, epicId1)).getId();
+            int subtaskId2 = taskManager.addSubtask(new Subtask(0,
+                    "Подзадача 2", "Подзадача 2", TaskStatus.NEW, epicId1,
+                    minStartTime.plusMinutes(20), 20)).getId();
+            int subtaskId3 = taskManager.addSubtask(new Subtask(0,
+                    "Подзадача 3", "Подзадача 3", TaskStatus.NEW, epicId1,
+                    minStartTime.plusMinutes(60), 30)).getId();
+            taskManager.addTask(new Task(0, "", "", TaskStatus.NEW, minStartTime, 20));
 
-        System.out.println("Get task: " + taskManager.getTask(taskId1));
-        System.out.println("Get task: " + taskManager.getEpic(epicId1));
-        System.out.println("Get task: " + taskManager.getSubtask(subtaskId1));
-        System.out.println("------------------");
+            printAllTasks(taskManager);
+            printHistory(taskManager);
 
-        printHistory(taskManager);
+            System.out.println("Get task: " + taskManager.getTask(taskId1));
+            System.out.println("Get task: " + taskManager.getEpic(epicId1));
+            System.out.println("Get task: " + taskManager.getSubtask(subtaskId1));
+            System.out.println("------------------");
 
-        Subtask subtask = taskManager.getSubtask(subtaskId2);
-        System.out.println("Get task: " + subtask);
-        taskManager.updateSubtask(new Subtask(subtask.getId(), subtask.getName(), subtask.getDescription(),
-                TaskStatus.IN_PROGRESS, subtask.getEpicId(), minStartTime.plusMinutes(25), 25));
-        subtask = taskManager.getSubtask(subtaskId1);
-        System.out.println("Get task: " + subtask);
-        taskManager.updateSubtask(new Subtask(subtask.getId(), subtask.getName(), subtask.getDescription(),
-                TaskStatus.IN_PROGRESS, subtask.getEpicId()));
-        Epic epic = taskManager.getEpic(epicId1);
-        taskManager.updateEpic(new Epic(epic.getId(), epic.getName() + " updated", epic.getDescription()));
-        System.out.println("------------------");
+            printHistory(taskManager);
 
-        printHistory(taskManager);
+            Subtask subtask = taskManager.getSubtask(subtaskId2);
+            System.out.println("Get task: " + subtask);
+            taskManager.updateSubtask(new Subtask(subtask.getId(), subtask.getName(), subtask.getDescription(),
+                    TaskStatus.IN_PROGRESS, subtask.getEpicId(), minStartTime.plusMinutes(25), 25));
+            subtask = taskManager.getSubtask(subtaskId1);
+            System.out.println("Get task: " + subtask);
+            taskManager.updateSubtask(new Subtask(subtask.getId(), subtask.getName(), subtask.getDescription(),
+                    TaskStatus.IN_PROGRESS, subtask.getEpicId()));
+            Epic epic = taskManager.getEpic(epicId1);
+            taskManager.updateEpic(new Epic(epic.getId(), epic.getName() + " updated", epic.getDescription()));
+            System.out.println("------------------");
 
-        System.out.println("Get task: " + taskManager.getTask(taskId2));
-        System.out.println("Get task: " + taskManager.getSubtask(subtaskId3));
-        System.out.println("Get task: " + taskManager.getEpic(epicId2));
-        System.out.println("------------------");
+            printHistory(taskManager);
 
-        printAllTasks(taskManager);
-        printHistory(taskManager);
-        printPrioritizedTasks(taskManager);
+            System.out.println("Get task: " + taskManager.getTask(taskId2));
+            System.out.println("Get task: " + taskManager.getSubtask(subtaskId3));
+            System.out.println("Get task: " + taskManager.getEpic(epicId2));
+            System.out.println("------------------");
+
+            printAllTasks(taskManager);
+            printHistory(taskManager);
+            printPrioritizedTasks(taskManager);
 
 //        System.out.println("Remove subtask " + subtaskId2);
 //        taskManager.removeSubtask(subtaskId2);
@@ -106,14 +109,15 @@ public class Main {
 //        filePath = Path.of("resources", "taskManager2.csv");
 //        taskManager.clearTasks();
 //        taskManager.clearEpics();
-        TaskManager taskManagerCopy = Managers.getHttp("http://localhost:" + KVServer.PORT, true);
-        System.out.println("------------------");
-        System.out.println("Task manager from file:");
-        printAllTasks(taskManagerCopy);
-        printHistory(taskManagerCopy);
-        printPrioritizedTasks(taskManagerCopy);
-
-        kvServer.stop(0);
+            TaskManager taskManagerCopy = Managers.getHttp("http://localhost:" + KVServer.PORT, true);
+            System.out.println("------------------");
+            System.out.println("Task manager from file:");
+            printAllTasks(taskManagerCopy);
+            printHistory(taskManagerCopy);
+            printPrioritizedTasks(taskManagerCopy);
+        } finally {
+            kvServer.stop(0);
+        }
     }
 
     private static void printAllTasks(TaskManager taskManager) {

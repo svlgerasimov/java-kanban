@@ -1,16 +1,13 @@
 package ru.yandex.practicum.kanban.managers.backed.http;
 
 import com.google.gson.*;
-import ru.yandex.practicum.kanban.managers.backed.ManagerLoadException;
-import ru.yandex.practicum.kanban.managers.backed.ManagerSaveException;
 import ru.yandex.practicum.kanban.managers.backed.filebacked.FileBackedTaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
-import ru.yandex.practicum.kanban.util.KVTaskClient;
+import ru.yandex.practicum.kanban.util.kvstorage.KVTaskClient;
 import ru.yandex.practicum.kanban.util.json.GsonBuilders;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -45,13 +42,10 @@ public class HttpTaskManager extends FileBackedTaskManager {
         return gson.toJson(jsonObject);
     }
 
+    // throw: ClientSendException, ClientBadResponseException
     @Override
     protected void saveToTarget(String content) {
-        try {
-            taskClient.put(storageKey, content);
-        } catch (IOException | InterruptedException e) {
-            throw new ManagerSaveException("Manager save to storage exception: " + e.getMessage());
-        }
+        taskClient.put(storageKey, content);
     }
 
     @Override
@@ -67,12 +61,9 @@ public class HttpTaskManager extends FileBackedTaskManager {
         deserializeHistory(Arrays.stream(gson.fromJson(jsonObject.get("history"), Integer[].class)));
     }
 
+    // throw: ClientSendException, ClientBadResponseException
     @Override
     protected String loadFromTarget() {
-        try {
-            return taskClient.load(storageKey);
-        } catch (IOException | InterruptedException e) {
-            throw new ManagerLoadException("Manager load from storage exception: " + e.getMessage());
-        }
+        return taskClient.load(storageKey);
     }
 }

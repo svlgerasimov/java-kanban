@@ -9,13 +9,13 @@ import ru.yandex.practicum.kanban.util.json.GsonBuilders;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
+import ru.yandex.practicum.kanban.util.kvstorage.KVServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -48,19 +48,18 @@ public class HttpTaskServer {
     }
 
     // Для проверки api внешними средствами
-    public static void main(String[] args) {
-        HttpTaskServer httpTaskServer;
-        try {
-            Path filePath = Path.of("src","main", "resources", "taskManager.csv");
-            httpTaskServer = new HttpTaskServer(filePath, true);
-            httpTaskServer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void main(String[] args) throws IOException {
+        KVServer kvServer = new KVServer();
+        kvServer.start();
+        HttpTaskServer httpTaskServer = new HttpTaskServer(Managers.getDefault());
+        httpTaskServer.start();
     }
 
-    public HttpTaskServer(Path filePath, boolean restoreTaskManager) throws IOException {
-        taskManager = Managers.getFileBacked(filePath, restoreTaskManager);
+    // Http серверу ведь не должно быть важно, с какой реализацией менеджера задач он работает.
+    // Поэтому создание менеджера разумнее вынести за пределы класса.
+    // А getDefault из ТЗ - будет в main )
+    public HttpTaskServer(TaskManager taskManager) throws IOException {
+        this.taskManager = taskManager;
 
         InetSocketAddress inetSocketAddress = new InetSocketAddress(PORT);
         httpServer = HttpServer.create();

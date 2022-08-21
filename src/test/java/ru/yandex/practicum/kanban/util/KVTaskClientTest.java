@@ -3,6 +3,9 @@ package ru.yandex.practicum.kanban.util;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.kanban.util.kvstorage.ClientBadResponseException;
+import ru.yandex.practicum.kanban.util.kvstorage.KVServer;
+import ru.yandex.practicum.kanban.util.kvstorage.KVTaskClient;
 
 import java.io.IOException;
 
@@ -17,7 +20,7 @@ class KVTaskClientTest {
     void setUp() throws IOException {
         kvServer = new KVServer();
         kvServer.start();
-        kvTaskClient = new KVTaskClient("http://localhost:8078");
+        kvTaskClient = new KVTaskClient("http://localhost:" + KVServer.PORT);
     }
 
     @AfterEach
@@ -26,7 +29,7 @@ class KVTaskClientTest {
     }
 
     @Test
-    void loadTest() throws IOException, InterruptedException {
+    void loadTest() {
         String key1 = "key1";
         String value1 = "value1";
         String key2 = "key2";
@@ -37,6 +40,7 @@ class KVTaskClientTest {
         kvTaskClient.put(key2, value2);
         assertEquals(value1, kvTaskClient.load(key1));
         assertEquals(value2, kvTaskClient.load(key2));
-        assertNull(kvTaskClient.load(key3));
+//        assertNull(kvTaskClient.load(key3));
+        assertThrows(ClientBadResponseException.class, () -> kvTaskClient.load(key3));
     }
 }

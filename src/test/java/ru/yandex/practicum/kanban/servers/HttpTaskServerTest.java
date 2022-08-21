@@ -2,11 +2,14 @@ package ru.yandex.practicum.kanban.servers;
 
 import com.google.gson.*;
 import org.junit.jupiter.api.*;
+import ru.yandex.practicum.kanban.managers.Managers;
+import ru.yandex.practicum.kanban.managers.TaskManager;
 import ru.yandex.practicum.kanban.tasks.Epic;
 import ru.yandex.practicum.kanban.tasks.Subtask;
 import ru.yandex.practicum.kanban.tasks.Task;
 import ru.yandex.practicum.kanban.tasks.TaskStatus;
 import ru.yandex.practicum.kanban.util.json.GsonBuilders;
+import ru.yandex.practicum.kanban.util.kvstorage.KVServer;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,12 +37,12 @@ public class HttpTaskServerTest {
     private static final String ID_QUERY_FORMAT = "id=%d";
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-    private static final Path FILE_PATH = Path.of("src","test", "resources", "taskManager.csv");
     private final static LocalDateTime DEFAULT_TIME =
             LocalDateTime.of(2022, Month.JANUARY, 1, 1, 1, 0);
     private final static int REQUEST_TIMEOUT_SECONDS = 1;
 
     private static Gson gson;
+    private KVServer kvServer;
     private HttpTaskServer httpTaskServer;
     private static HttpClient client;
 
@@ -55,13 +58,16 @@ public class HttpTaskServerTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        httpTaskServer = new HttpTaskServer(FILE_PATH, false);
+        kvServer = new KVServer();
+        kvServer.start();
+        httpTaskServer = new HttpTaskServer(Managers.getDefault());
         httpTaskServer.start();
     }
 
     @AfterEach
     void tearDown() {
         httpTaskServer.stop(0);
+        kvServer.stop(0);
     }
 
     // Чтобы проверить запросы с отсутствующими или некорректными полями gson.toGson(task) не подойдет

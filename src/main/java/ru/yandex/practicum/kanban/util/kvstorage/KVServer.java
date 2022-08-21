@@ -1,4 +1,4 @@
-package ru.yandex.practicum.kanban.util;
+package ru.yandex.practicum.kanban.util.kvstorage;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -49,7 +49,7 @@ public class KVServer {
 				}
 				String value = data.get(key);
 				if (value == null) {
-					System.out.println("Значение для ключа " + key + "не найдено");
+					System.out.println("Значение для ключа " + key + " не найдено");
 					h.sendResponseHeaders(404, 0);
 					return;
 				}

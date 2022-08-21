@@ -5,10 +5,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.kanban.managers.backed.BackedTaskManagerTest;
-import ru.yandex.practicum.kanban.managers.backed.ManagerLoadException;
-import ru.yandex.practicum.kanban.managers.backed.ManagerSaveException;
-import ru.yandex.practicum.kanban.managers.backed.filebacked.FileBackedTaskManager;
-import ru.yandex.practicum.kanban.util.KVServer;
+import ru.yandex.practicum.kanban.util.kvstorage.ClientSendException;
+import ru.yandex.practicum.kanban.util.kvstorage.KVServer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,14 +35,12 @@ public class HttpTaskManagerTest extends BackedTaskManagerTest {
     }
 
     @Override
-    protected FileBackedTaskManager loadNewManager() {
+    protected HttpTaskManager loadStateInNewManager() {
         return new HttpTaskManager(kvServerUri, true);
     }
 
     @Test
     public void incorrectUrlTest() {
-        taskManager = new HttpTaskManager("http://localhost:77");
-        assertThrows(ManagerSaveException.class, taskManager::save);
-        assertThrows(ManagerLoadException.class, taskManager::load);
+        assertThrows(ClientSendException.class, () -> new HttpTaskManager("http://localhost:77"));
     }
 }
